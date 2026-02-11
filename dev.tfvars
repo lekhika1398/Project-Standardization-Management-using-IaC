@@ -3,16 +3,16 @@ subscription_id = ""
 org_prefix      = "lekhika"
 environment     = "dev"
 region_code     = "eus"
-location        = "eastus"
+location        = "centralindia"
 
 # Optional
 policy_scope_type          = "resource_group"
 management_group_id        = ""
-policy_assignment_location = "eastus"
+policy_assignment_location = "centralindia"
 
 # Optional
 deploy_app_service        = true
-app_service_plan_sku_name = "S1"
+app_service_plan_sku_name = "B1"
 
 # Optional
 mandatory_tags = [
@@ -23,7 +23,7 @@ mandatory_tags = [
 # Optional
 default_tags = {
   Environment = "dev"
-  Owner       = "platform-team"
+  Owner       = "lekhika.goswami"
   CostCenter  = "IT-DEV-001"
 }
 
