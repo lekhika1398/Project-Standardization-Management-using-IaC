@@ -24,6 +24,10 @@ env:
   ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
   ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
+  TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP != '' && vars.TFSTATE_RESOURCE_GROUP || secrets.TFSTATE_RESOURCE_GROUP }}
+  TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT != '' && vars.TFSTATE_STORAGE_ACCOUNT || secrets.TFSTATE_STORAGE_ACCOUNT }}
+  TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER != '' && vars.TFSTATE_CONTAINER || secrets.TFSTATE_CONTAINER }}
+  TFSTATE_KEY: ${{ vars.TFSTATE_KEY != '' && vars.TFSTATE_KEY || secrets.TFSTATE_KEY }}
   TF_VAR_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
   TF_VAR_org_prefix: ${{ vars.TF_VAR_ORG_PREFIX }}
   TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
@@ -47,10 +51,10 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
           AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-          TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP }}
-          TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
-          TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER }}
-          TFSTATE_KEY: ${{ vars.TFSTATE_KEY }}
+          TFSTATE_RESOURCE_GROUP: ${{ env.TFSTATE_RESOURCE_GROUP }}
+          TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
+          TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
+          TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
           TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
           TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
           TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
@@ -123,10 +127,10 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
-            -backend-config="key=${{ vars.TFSTATE_KEY }}"
+            -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ env.TFSTATE_CONTAINER }}" \
+            -backend-config="key=${{ env.TFSTATE_KEY }}"
 
       - name: Terraform Fmt
         run: terraform fmt -check -recursive
@@ -177,10 +181,10 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
           AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-          TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP }}
-          TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
-          TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER }}
-          TFSTATE_KEY: ${{ vars.TFSTATE_KEY }}
+          TFSTATE_RESOURCE_GROUP: ${{ env.TFSTATE_RESOURCE_GROUP }}
+          TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
+          TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
+          TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
           TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
           TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
           TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
@@ -253,10 +257,10 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
-            -backend-config="key=${{ vars.TFSTATE_KEY }}"
+            -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ env.TFSTATE_CONTAINER }}" \
+            -backend-config="key=${{ env.TFSTATE_KEY }}"
 
       - name: Terraform Plan (Apply Preview)
         run: terraform plan -no-color -out apply.tfplan
@@ -292,10 +296,10 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
           AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-          TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP }}
-          TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
-          TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER }}
-          TFSTATE_KEY: ${{ vars.TFSTATE_KEY }}
+          TFSTATE_RESOURCE_GROUP: ${{ env.TFSTATE_RESOURCE_GROUP }}
+          TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
+          TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
+          TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
           TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
           TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
           TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
@@ -368,10 +372,10 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
-            -backend-config="key=${{ vars.TFSTATE_KEY }}"
+            -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ env.TFSTATE_CONTAINER }}" \
+            -backend-config="key=${{ env.TFSTATE_KEY }}"
 
       - name: Terraform Destroy Plan
         run: terraform plan -destroy -no-color -out destroy.tfplan
