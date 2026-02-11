@@ -20,7 +20,7 @@ Production-ready Azure governance template using Terraform, Azure Policy, and Gi
   - `subscription`
   - `management_group`
 - Governance resource group support (`Lekhika_RG` default)
-- Optional free App Service deployment (F1)
+- Optional App Service deployment with configurable plan SKU (default `B1`)
 - Manual run workflow with operation choice: `plan`, `apply`, `destroy`
 - Approval-gated apply and destroy using GitHub Environments
 - Dedicated backend setup workflow that creates remote state resources and prints required backend values
@@ -84,7 +84,8 @@ Set these as **Repository Variables** (defaults for runtime):
 - `TF_VAR_ORG_PREFIX`
 - `TF_VAR_ENVIRONMENT`
 - `TF_VAR_REGION_CODE`
-- `TF_VAR_LOCATION`
+
+Location is managed in the selected `tfvars` file (for example `dev.tfvars`), not as a workflow runtime input.
 
 Optional default variables:
 
@@ -92,7 +93,7 @@ Optional default variables:
 - `TF_VAR_MANAGEMENT_GROUP_ID`
 - `TF_VAR_GOVERNANCE_RG_NAME`
 - `TF_VAR_CREATE_GOVERNANCE_RG`
-- `TF_VAR_DEPLOY_FREE_APP_SERVICE`
+- `TF_VAR_DEPLOY_FREE_APP_SERVICE` (legacy name; controls App Service deployment on/off)
 - `TF_VAR_APP_SERVICE_PLAN_SKU_NAME`
 - `TF_VAR_APP_SERVICE_NAME_PREFIX`
 

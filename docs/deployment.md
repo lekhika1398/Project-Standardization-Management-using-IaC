@@ -128,7 +128,10 @@ Set repository variables:
 - `TF_VAR_ORG_PREFIX`
 - `TF_VAR_ENVIRONMENT`
 - `TF_VAR_REGION_CODE`
-- `TF_VAR_LOCATION`
+
+Set deployment location in the selected tfvars file (for example `dev.tfvars`):
+
+- `location = "eastus2"` (or your preferred Azure region)
 
 Optional:
 
@@ -136,7 +139,7 @@ Optional:
 - `TF_VAR_MANAGEMENT_GROUP_ID`
 - `TF_VAR_GOVERNANCE_RG_NAME`
 - `TF_VAR_CREATE_GOVERNANCE_RG`
-- `TF_VAR_DEPLOY_FREE_APP_SERVICE`
+- `TF_VAR_DEPLOY_FREE_APP_SERVICE` (legacy name; controls App Service deployment on/off)
 - `TF_VAR_APP_SERVICE_PLAN_SKU_NAME`
 - `TF_VAR_APP_SERVICE_NAME_PREFIX`
 
@@ -167,8 +170,9 @@ Optional per-run overrides in workflow inputs:
 - `org_prefix`
 - `environment`
 - `region_code`
-- `location`
 - `tfvars_file` (default `dev.tfvars`)
+
+`location` is sourced from the selected tfvars file.
 
 `dev.tfvars` profile behavior:
 

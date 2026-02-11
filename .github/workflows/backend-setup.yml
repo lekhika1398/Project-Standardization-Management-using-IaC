@@ -148,5 +148,4 @@ jobs:
             echo "- TF_VAR_ORG_PREFIX"
             echo "- TF_VAR_ENVIRONMENT"
             echo "- TF_VAR_REGION_CODE"
-            echo "- TF_VAR_LOCATION"
           } >> "$GITHUB_STEP_SUMMARY"
