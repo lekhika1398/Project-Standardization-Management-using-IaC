@@ -47,12 +47,6 @@ variable "policy_assignment_location" {
   default     = "eastus"
 }
 
-variable "deployment_resource_group_name" {
-  description = "Resource group name created for resource deployment and resource-group policy assignment scope."
-  type        = string
-  default     = "Lekhika_RG"
-}
-
 variable "mandatory_tags" {
   description = "Mandatory tags used on managed resources."
   type        = list(string)
@@ -81,10 +75,4 @@ variable "app_service_plan_sku_name" {
   description = "App Service plan SKU name (for example: F1, B1, S1)."
   type        = string
   default     = "B1"
-}
-
-variable "app_service_name_prefix" {
-  description = "Prefix used to build a globally unique App Service name."
-  type        = string
-  default     = "lekhika-webapp"
 }

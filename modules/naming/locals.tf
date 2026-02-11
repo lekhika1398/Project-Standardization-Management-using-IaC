@@ -1,9 +1,9 @@
 locals {
-  normalized_org_prefix    = lower(regexreplace(var.org_prefix, "[^a-zA-Z0-9-]", ""))
-  normalized_environment   = lower(regexreplace(var.environment, "[^a-zA-Z0-9-]", ""))
-  normalized_resource_type = lower(regexreplace(var.resource_type, "[^a-zA-Z0-9-]", ""))
-  normalized_region_code   = lower(regexreplace(var.region_code, "[^a-zA-Z0-9-]", ""))
-  normalized_instance      = lower(regexreplace(var.instance, "[^a-zA-Z0-9-]", ""))
+  normalized_org_prefix    = lower(replace(var.org_prefix, "/[^a-zA-Z0-9-]/", ""))
+  normalized_environment   = lower(replace(var.environment, "/[^a-zA-Z0-9-]/", ""))
+  normalized_resource_type = lower(replace(var.resource_type, "/[^a-zA-Z0-9-]/", ""))
+  normalized_region_code   = lower(replace(var.region_code, "/[^a-zA-Z0-9-]/", ""))
+  normalized_instance      = lower(replace(var.instance, "/[^a-zA-Z0-9-]/", ""))
 
   name_parts = compact([
     local.normalized_org_prefix,

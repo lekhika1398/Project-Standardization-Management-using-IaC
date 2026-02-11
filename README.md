@@ -19,7 +19,7 @@ Production-ready Azure governance template using Terraform, Azure Policy, and Gi
   - `resource_group`
   - `subscription`
   - `management_group`
-- Deployment resource group support (`Lekhika_RG` default)
+- Deployment resource group support with naming convention auto-generation
 - Optional App Service deployment with configurable plan SKU (default `B1`)
 - Manual run workflow with operation choice: `plan`, `apply`, `destroy`
 - Approval-gated apply and destroy using GitHub Environments
@@ -101,6 +101,8 @@ Terraform deployment values are sourced from the selected tfvars file (for examp
 - `management_group`: governance at scale across subscriptions.
 
 Use `subscription` or `management_group` scope for resource-group naming policy enforcement.
+Resource group name is auto-generated from `<org_prefix>-<environment>-rg-<region_code>`.
+App Service name is auto-generated from `<org_prefix>-<environment>-app-<region_code>-<subscription_fragment>`.
 
 ## Extensibility Model
 

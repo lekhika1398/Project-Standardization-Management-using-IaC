@@ -14,10 +14,28 @@ locals {
   management_group_scope_id = var.management_group_id != "" ? "/providers/Microsoft.Management/managementGroups/${var.management_group_id}" : null
 }
 
+module "deployment_rg_name" {
+  source = "./modules/naming"
+
+  org_prefix    = var.org_prefix
+  environment   = var.environment
+  resource_type = "rg"
+  region_code   = var.region_code
+}
+
+module "app_service_name" {
+  source = "./modules/naming"
+
+  org_prefix    = var.org_prefix
+  environment   = var.environment
+  resource_type = "app"
+  region_code   = var.region_code
+}
+
 module "deployment_resource_group" {
   source = "./modules/resource-group"
 
-  rg_name  = var.deployment_resource_group_name
+  rg_name  = module.deployment_rg_name.resource_name
   location = var.location
   tags     = local.governance_tags
 }
@@ -30,8 +48,7 @@ module "app_service" {
   resource_group_name     = module.deployment_resource_group.name
   location                = module.deployment_resource_group.location
   tags                    = local.governance_tags
-  app_service_name_prefix = var.app_service_name_prefix
-  environment             = var.environment
+  app_service_name_prefix = module.app_service_name.resource_name
   subscription_id         = data.azurerm_subscription.current.subscription_id
 }
 

@@ -31,11 +31,6 @@ variable "app_service_name_prefix" {
   type        = string
 }
 
-variable "environment" {
-  description = "Environment short name used in generated names."
-  type        = string
-}
-
 variable "subscription_id" {
   description = "Subscription ID used to generate deterministic unique suffix."
   type        = string
@@ -46,7 +41,7 @@ locals {
   plan_sku_fragment     = lower(replace(var.service_plan_sku_name, "_", "-"))
 
   app_service_name = lower(substr(
-    replace("${var.app_service_name_prefix}-${var.environment}-${local.subscription_fragment}", "/[^a-z0-9-]/", ""),
+    replace("${var.app_service_name_prefix}-${local.subscription_fragment}", "/[^a-z0-9-]/", ""),
     0,
     60
   ))
