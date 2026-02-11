@@ -61,6 +61,7 @@ Optional default variables:
 - `TF_VAR_GOVERNANCE_RG_NAME`
 - `TF_VAR_CREATE_GOVERNANCE_RG`
 - `TF_VAR_DEPLOY_FREE_APP_SERVICE`
+- `TF_VAR_APP_SERVICE_PLAN_SKU_NAME` (for example: `B1`, `S1`, `F1`)
 - `TF_VAR_APP_SERVICE_NAME_PREFIX`
 
 ## 6. Add Policies (Unlimited)

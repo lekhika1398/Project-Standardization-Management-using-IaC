@@ -78,9 +78,15 @@ variable "policy_assignment_parameters" {
 }
 
 variable "deploy_free_app_service" {
-  description = "When true, deploy a free tier App Service Plan and Web App in the governance resource group."
+  description = "When true, deploy an App Service Plan and Web App in the governance resource group."
   type        = bool
   default     = true
+}
+
+variable "app_service_plan_sku_name" {
+  description = "App Service plan SKU name (for example: F1, B1, S1)."
+  type        = string
+  default     = "B1"
 }
 
 variable "app_service_name_prefix" {

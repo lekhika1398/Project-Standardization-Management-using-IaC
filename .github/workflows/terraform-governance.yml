@@ -101,6 +101,7 @@ jobs:
           TF_VAR_GOVERNANCE_RG_NAME: ${{ vars.TF_VAR_GOVERNANCE_RG_NAME }}
           TF_VAR_CREATE_GOVERNANCE_RG: ${{ vars.TF_VAR_CREATE_GOVERNANCE_RG }}
           TF_VAR_DEPLOY_FREE_APP_SERVICE: ${{ vars.TF_VAR_DEPLOY_FREE_APP_SERVICE }}
+          TF_VAR_APP_SERVICE_PLAN_SKU_NAME: ${{ vars.TF_VAR_APP_SERVICE_PLAN_SKU_NAME }}
           TF_VAR_APP_SERVICE_NAME_PREFIX: ${{ vars.TF_VAR_APP_SERVICE_NAME_PREFIX }}
         run: |
           set -euo pipefail
@@ -120,6 +121,9 @@ jobs:
           fi
           if [ -n "$TF_VAR_DEPLOY_FREE_APP_SERVICE" ]; then
             echo "deploy_free_app_service = $TF_VAR_DEPLOY_FREE_APP_SERVICE" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_APP_SERVICE_PLAN_SKU_NAME" ]; then
+            echo "app_service_plan_sku_name = \"$TF_VAR_APP_SERVICE_PLAN_SKU_NAME\"" >> ci.auto.tfvars
           fi
           if [ -n "$TF_VAR_APP_SERVICE_NAME_PREFIX" ]; then
             echo "app_service_name_prefix = \"$TF_VAR_APP_SERVICE_NAME_PREFIX\"" >> ci.auto.tfvars

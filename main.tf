@@ -27,6 +27,7 @@ module "governance_app_service" {
   source = "./modules/app-service"
 
   deploy                  = var.deploy_free_app_service
+  service_plan_sku_name   = var.app_service_plan_sku_name
   resource_group_name     = module.governance_resource_group.name
   location                = module.governance_resource_group.location
   tags                    = local.governance_tags
