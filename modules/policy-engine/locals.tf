@@ -30,31 +30,23 @@ locals {
 
   effective_policy_assignment_parameters = merge(local.default_policy_assignment_parameters, var.policy_assignment_parameters)
 
-  assignment_parameters_json = {
+  resolved_policy_parameters = {
     for policy_key, properties in local.policy_properties :
-    policy_key => (
-      length(try(properties.parameters, {})) == 0
-      ? null
-      : jsonencode({
-        for parameter_name, parameter_definition in try(properties.parameters, {}) :
-        parameter_name => {
-          value = (
-            contains(keys(lookup(local.effective_policy_assignment_parameters, policy_key, {})), parameter_name)
-            ? lookup(local.effective_policy_assignment_parameters[policy_key], parameter_name, null)
-            : try(parameter_definition.defaultValue, null)
-          )
-        }
-        if (
-          contains(keys(lookup(local.effective_policy_assignment_parameters, policy_key, {})), parameter_name) ||
-          can(parameter_definition.defaultValue)
-        )
-      })
-    )
+    policy_key => {
+      for parameter_name, parameter_definition in try(properties.parameters, {}) :
+      parameter_name => {
+        value = contains(keys(lookup(local.effective_policy_assignment_parameters, policy_key, {})), parameter_name) ? lookup(local.effective_policy_assignment_parameters[policy_key], parameter_name, null) : try(parameter_definition.defaultValue, null)
+      }
+      if contains(keys(lookup(local.effective_policy_assignment_parameters, policy_key, {})), parameter_name) || can(parameter_definition.defaultValue)
+    }
   }
 
-  policy_scope = (
-    var.policy_scope_type == "resource_group" ? var.resource_group_scope_id :
-    var.policy_scope_type == "subscription" ? var.subscription_scope_id :
-    var.management_group_scope_id
+  assignment_parameters_json = {
+    for policy_key, properties in local.policy_properties :
+    policy_key => length(try(properties.parameters, {})) == 0 ? null : jsonencode(local.resolved_policy_parameters[policy_key])
+  }
+
+  policy_scope = var.policy_scope_type == "resource_group" ? var.resource_group_scope_id : (
+    var.policy_scope_type == "subscription" ? var.subscription_scope_id : var.management_group_scope_id
   )
 }
