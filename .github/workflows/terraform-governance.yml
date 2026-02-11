@@ -215,7 +215,7 @@ jobs:
     if: ${{ inputs.operation == 'apply' }}
     runs-on: ubuntu-latest
     needs: terraform-plan
-    environment: terraform-apply
+    environment: terraform-ops
     defaults:
       run:
         shell: bash
@@ -278,7 +278,7 @@ jobs:
     if: ${{ inputs.operation == 'destroy' }}
     runs-on: ubuntu-latest
     needs: terraform-plan
-    environment: terraform-destroy
+    environment: terraform-ops
     defaults:
       run:
         shell: bash
