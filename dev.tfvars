@@ -11,7 +11,6 @@ policy_assignment_location = "eastus"
 create_governance_resource_group = true
 governance_resource_group_name   = "lekhika-dev-rg-eus2"
 
-deploy_free_app_service   = true
 app_service_plan_sku_name = "B1"
 app_service_name_prefix   = "lekhika-dev-webapp"
 
