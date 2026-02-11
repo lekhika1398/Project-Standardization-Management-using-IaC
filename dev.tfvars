@@ -1,8 +1,8 @@
 subscription_id = ""
 org_prefix      = "lekhika"
 environment     = "dev"
-region_code     = "eus2"
-location        = "eastus2"
+region_code     = "eus"
+location        = "eastus"
 
 policy_scope_type          = "resource_group"
 management_group_id        = ""
