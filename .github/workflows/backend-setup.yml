@@ -128,11 +128,3 @@ jobs:
             echo "- TF_VAR_REGION_CODE"
             echo "- TF_VAR_LOCATION"
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Print Copy Commands
-        shell: bash
-        run: |
-          echo "gh variable set TFSTATE_RESOURCE_GROUP --body '${{ steps.backend.outputs.tfstate_resource_group }}'"
-          echo "gh variable set TFSTATE_STORAGE_ACCOUNT --body '${{ steps.backend.outputs.tfstate_storage_account }}'"
-          echo "gh variable set TFSTATE_CONTAINER --body '${{ steps.backend.outputs.tfstate_container }}'"
-          echo "gh variable set TFSTATE_KEY --body '${{ steps.backend.outputs.tfstate_key }}'"
