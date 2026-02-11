@@ -35,6 +35,8 @@ Set these repository values (variables or secrets):
 - `AZURE_TENANT_ID` = `<TENANT_ID>`
 - `AZURE_SUBSCRIPTION_ID` = `<SUBSCRIPTION_ID>`
 
+No separate `ARM_*` repository values are required.
+
 ## 4. Run Backend Setup Workflow
 
 Run **Backend Setup** workflow with inputs:

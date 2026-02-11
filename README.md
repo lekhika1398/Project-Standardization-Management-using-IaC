@@ -77,6 +77,8 @@ Set these as **Repository Variables or Secrets**:
 - `TFSTATE_CONTAINER`
 - `TFSTATE_KEY`
 
+Note: You do not need to create any `ARM_*` repository values. Workflows use only `AZURE_*` and `TFSTATE_*` inputs.
+
 Set these as **Repository Variables** (defaults for runtime):
 
 - `TF_VAR_ORG_PREFIX`

@@ -6,6 +6,7 @@
    - `AZURE_CLIENT_ID`
    - `AZURE_TENANT_ID`
    - `AZURE_SUBSCRIPTION_ID`
+   - Do not add separate `ARM_*` values.
 2. Run workflow `.github/workflows/backend-setup.yml`.
 3. Copy backend output values from workflow summary into repository values:
    - `TFSTATE_RESOURCE_GROUP`
