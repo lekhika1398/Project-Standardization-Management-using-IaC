@@ -26,6 +26,8 @@ Run workflow `.github/workflows/terraform-governance.yml` and choose `operation`
 - `apply`: plans and applies changes (requires `terraform-apply` environment approval)
 - `destroy`: plans destroy and applies destroy (requires `terraform-destroy` environment approval)
 
+Default `tfvars_file` is `dev.tfvars`, which creates a new governance resource group and assigns policies to that resource group.
+
 ## 3. Pass Variables at Runtime
 
 You can override defaults at run time in workflow dispatch inputs:
@@ -34,6 +36,7 @@ You can override defaults at run time in workflow dispatch inputs:
 - `environment`
 - `region_code`
 - `location`
+- `tfvars_file` (for example: `dev.tfvars`)
 
 If an input is blank, workflow uses corresponding repository variable.
 
@@ -74,12 +77,11 @@ No root Terraform changes are required.
 ## 8. Local Terraform Commands (Optional)
 
 ```bash
-cp terraform.tfvars.example terraform.tfvars
 terraform init \
   -backend-config="resource_group_name=<TFSTATE_RESOURCE_GROUP>" \
   -backend-config="storage_account_name=<TFSTATE_STORAGE_ACCOUNT>" \
   -backend-config="container_name=<TFSTATE_CONTAINER>" \
   -backend-config="key=governance.terraform.tfstate"
-terraform plan -out tfplan
+terraform plan -var-file=dev.tfvars -out tfplan
 terraform apply tfplan
 ```

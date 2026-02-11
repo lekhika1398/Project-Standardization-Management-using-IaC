@@ -28,6 +28,10 @@ on:
         description: "Override location for this run (optional)"
         required: false
         default: ""
+      tfvars_file:
+        description: "Optional tfvars file path in repo (example: dev.tfvars)"
+        required: false
+        default: "dev.tfvars"
 
 permissions:
   id-token: write
@@ -155,7 +159,13 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -no-color -out tfplan
+        run: |
+          TFVARS_FILE="${{ inputs.tfvars_file }}"
+          TFVARS_FLAG=""
+          if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
+            TFVARS_FLAG="-var-file=$TFVARS_FILE"
+          fi
+          terraform plan -no-color -out tfplan $TFVARS_FLAG
 
       - name: Terraform Plan Summary
         run: |
@@ -279,7 +289,13 @@ jobs:
             -backend-config="key=${{ env.TFSTATE_KEY }}"
 
       - name: Terraform Plan (Apply Preview)
-        run: terraform plan -no-color -out apply.tfplan
+        run: |
+          TFVARS_FILE="${{ inputs.tfvars_file }}"
+          TFVARS_FLAG=""
+          if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
+            TFVARS_FLAG="-var-file=$TFVARS_FILE"
+          fi
+          terraform plan -no-color -out apply.tfplan $TFVARS_FLAG
 
       - name: Terraform Apply Preview Summary
         run: |
@@ -394,7 +410,13 @@ jobs:
             -backend-config="key=${{ env.TFSTATE_KEY }}"
 
       - name: Terraform Destroy Plan
-        run: terraform plan -destroy -no-color -out destroy.tfplan
+        run: |
+          TFVARS_FILE="${{ inputs.tfvars_file }}"
+          TFVARS_FLAG=""
+          if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
+            TFVARS_FLAG="-var-file=$TFVARS_FILE"
+          fi
+          terraform plan -destroy -no-color -out destroy.tfplan $TFVARS_FLAG
 
       - name: Terraform Destroy Summary
         run: |

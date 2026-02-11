@@ -11,6 +11,7 @@ required_files=(
   "variables.tf"
   "outputs.tf"
   "backend.tf"
+  "dev.tfvars"
   ".github/workflows/backend-setup.yml"
   ".github/workflows/terraform-governance.yml"
   "policies/tagging/definition.json"

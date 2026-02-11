@@ -35,6 +35,7 @@ azure-terraform-governance-template/
 ├── terraform.tfvars.example
 ├── outputs.tf
 ├── backend.tf
+├── dev.tfvars
 ├── preflight.sh
 ├── modules/
 │   ├── naming/
@@ -97,11 +98,13 @@ Optional default variables:
 1. Configure OIDC values (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`).
 2. Run `Backend Setup` workflow and copy backend outputs.
 3. Save backend outputs as `TFSTATE_*` repository values.
-4. Configure `TF_VAR_*` defaults (or pass at runtime when triggering workflow).
-5. Run `Terraform Governance` workflow and choose operation:
+4. Use `dev.tfvars` for default dev deployment profile (creates RG and assigns policies at that RG scope).
+5. Configure `TF_VAR_*` defaults (or pass at runtime when triggering workflow).
+6. Run `Terraform Governance` workflow and choose operation:
    - `plan`
    - `apply` (approval required in `terraform-apply` environment)
    - `destroy` (approval required in `terraform-destroy` environment)
+7. Keep `tfvars_file` input as `dev.tfvars` for dev runs, or change it for other profiles.
 
 ## Scope Guidance
 

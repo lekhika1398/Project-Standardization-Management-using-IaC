@@ -156,6 +156,13 @@ Optional per-run overrides in workflow inputs:
 - `environment`
 - `region_code`
 - `location`
+- `tfvars_file` (default `dev.tfvars`)
+
+`dev.tfvars` profile behavior:
+
+- Creates a new governance resource group (`lekhika-dev-rg-eus2`)
+- Sets policy scope to `resource_group`
+- Assigns policies to that governance resource group
 
 ## 10. Validate and Troubleshoot
 
