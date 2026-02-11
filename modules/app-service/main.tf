@@ -39,7 +39,7 @@ locals {
   subscription_fragment = substr(replace(var.subscription_id, "-", ""), 0, 6)
 
   app_service_name = lower(substr(
-    regexreplace("${var.app_service_name_prefix}-${var.environment}-${local.subscription_fragment}", "[^a-z0-9-]", ""),
+    replace("${var.app_service_name_prefix}-${var.environment}-${local.subscription_fragment}", "/[^a-z0-9-]/", ""),
     0,
     60
   ))
