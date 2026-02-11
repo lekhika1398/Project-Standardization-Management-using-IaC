@@ -17,9 +17,9 @@ locals {
 module "deployment_resource_group" {
   source = "./modules/resource-group"
 
-  rg_name   = var.deployment_resource_group_name
-  location  = var.location
-  tags      = local.governance_tags
+  rg_name  = var.deployment_resource_group_name
+  location = var.location
+  tags     = local.governance_tags
 }
 
 module "app_service" {
