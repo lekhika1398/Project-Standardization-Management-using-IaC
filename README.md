@@ -4,25 +4,26 @@ Production-ready Azure governance template using Terraform, Azure Policy, and Gi
 
 ## Deployment Index
 
-1. Backend bootstrap workflow: `.github/workflows/backend-setup.yml`
-2. Service principal and OIDC setup: `deployment.md`
-3. GitHub variables setup: `deployment.md`
-4. Governance deployment pipeline: `.github/workflows/terraform-governance.yml`
-5. Template usage and scope switch: `how-to-use.md`
-6. Policy authoring and scaling: `policies/README.md`
+1. OIDC service principal setup: `docs/deployment.md`
+2. Backend bootstrap workflow: `.github/workflows/backend-setup.yml`
+3. Governance operations workflow: `.github/workflows/terraform-governance.yml`
+4. Runtime operation usage and scope switching: `docs/how-to-use.md`
+5. Policy extension model: `policies/README.md`
+6. Security posture summary: `docs/security/security-analytics-report.md`
 
 ## What This Template Delivers
 
 - Modular policy-as-code architecture
 - Auto-discovery of policies from `policies/*/definition.json`
-- Policy assignment scope selectable by user:
+- Selectable policy assignment scope:
   - `resource_group`
   - `subscription`
   - `management_group`
 - Governance resource group support (`Lekhika_RG` default)
 - Optional free App Service deployment (F1)
-- CI/CD pipeline with Terraform plan on PR and apply on `main`
-- Dedicated backend setup workflow to create and publish state configuration values
+- Manual run workflow with operation choice: `plan`, `apply`, `destroy`
+- Approval-gated apply and destroy using GitHub Environments
+- Dedicated backend setup workflow that creates remote state resources and prints required backend values
 
 ## Repository Structure
 
@@ -36,32 +37,36 @@ azure-terraform-governance-template/
 ├── backend.tf
 ├── preflight.sh
 ├── modules/
-│   └── naming/
+│   ├── naming/
+│   ├── resource-group/
+│   ├── app-service/
+│   └── policy-engine/
 │       ├── variables.tf
 │       ├── locals.tf
+│       ├── definitions.tf
+│       ├── assignments.tf
 │       └── outputs.tf
 ├── policies/
 │   ├── tagging/
-│   │   ├── definition.json
-│   │   └── policy.tf
 │   ├── naming/
-│   │   ├── definition.json
-│   │   └── policy.tf
 │   └── README.md
-├── resources/
-│   └── resource-group.tf
+├── scripts/
+│   └── preflight.sh
 ├── .github/
 │   └── workflows/
 │       ├── backend-setup.yml
 │       └── terraform-governance.yml
-├── security/
-│   └── security-analytics-report.md
-├── how-to-use.md
-├── deployment.md
+├── docs/
+│   ├── deployment.md
+│   ├── how-to-use.md
+│   └── security/
+│       └── security-analytics-report.md
 └── README.md
 ```
 
-## Required GitHub Repository Variables
+## Required GitHub Values
+
+Set these as **Repository Variables or Secrets**:
 
 - `AZURE_CLIENT_ID`
 - `AZURE_TENANT_ID`
@@ -70,12 +75,15 @@ azure-terraform-governance-template/
 - `TFSTATE_STORAGE_ACCOUNT`
 - `TFSTATE_CONTAINER`
 - `TFSTATE_KEY`
+
+Set these as **Repository Variables** (defaults for runtime):
+
 - `TF_VAR_ORG_PREFIX`
 - `TF_VAR_ENVIRONMENT`
 - `TF_VAR_REGION_CODE`
 - `TF_VAR_LOCATION`
 
-Optional repository variables:
+Optional default variables:
 
 - `TF_VAR_POLICY_SCOPE_TYPE`
 - `TF_VAR_MANAGEMENT_GROUP_ID`
@@ -86,24 +94,19 @@ Optional repository variables:
 
 ## Quick Start
 
-1. Configure OIDC variables (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`).
-2. Run **Backend Setup** workflow to create remote state backend.
-3. Add backend outputs to repository variables.
-4. Add required `TF_VAR_*` repository variables.
-5. Open PR to `main` to run Terraform plan.
-6. Merge PR to trigger apply.
+1. Configure OIDC values (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`).
+2. Run `Backend Setup` workflow and copy backend outputs.
+3. Save backend outputs as `TFSTATE_*` repository values.
+4. Configure `TF_VAR_*` defaults (or pass at runtime when triggering workflow).
+5. Run `Terraform Governance` workflow and choose operation:
+   - `plan`
+   - `apply` (approval required in `terraform-apply` environment)
+   - `destroy` (approval required in `terraform-destroy` environment)
 
 ## Scope Guidance
 
 - `resource_group`: targeted governance rollout for one RG.
-- `subscription`: standard enterprise baseline across subscription.
-- `management_group`: multi-subscription governance at scale.
+- `subscription`: baseline across subscription.
+- `management_group`: governance at scale across subscriptions.
 
-Use `subscription` or `management_group` for resource-group naming policy enforcement.
-
-## Documentation Index
-
-- `deployment.md`: end-to-end setup with exact commands
-- `how-to-use.md`: daily usage, scope changes, and operations
-- `policies/README.md`: how to add unlimited policies
-- `security/security-analytics-report.md`: governance control analysis
+Use `subscription` or `management_group` scope for resource-group naming policy enforcement.

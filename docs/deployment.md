@@ -4,8 +4,8 @@
 
 - Azure subscription and tenant access
 - GitHub repository with Actions enabled
-- Permissions to create Azure AD app registrations and role assignments
-- Terraform backend resources will be created by workflow `backend-setup.yml`
+- Permission to create Entra app registrations and role assignments
+- Terraform backend will be created by workflow `.github/workflows/backend-setup.yml`
 
 ## 2. Create Service Principal and OIDC Federation
 
@@ -25,15 +25,11 @@ SP_OBJECT_ID="$(az ad sp create --id "$APP_ID" --query id -o tsv)"
 az ad app federated-credential create \
   --id "$APP_ID" \
   --parameters "{\"name\":\"github-main\",\"issuer\":\"https://token.actions.githubusercontent.com\",\"subject\":\"repo:${GITHUB_ORG}/${GITHUB_REPO}:ref:refs/heads/main\",\"audiences\":[\"api://AzureADTokenExchange\"]}"
-
-az ad app federated-credential create \
-  --id "$APP_ID" \
-  --parameters "{\"name\":\"github-pr\",\"issuer\":\"https://token.actions.githubusercontent.com\",\"subject\":\"repo:${GITHUB_ORG}/${GITHUB_REPO}:pull_request\",\"audiences\":[\"api://AzureADTokenExchange\"]}"
 ```
 
-## 3. Set Initial GitHub Repository Variables
+## 3. Configure Core GitHub Values
 
-Set these first so workflows can authenticate:
+Set these repository values (variables or secrets):
 
 - `AZURE_CLIENT_ID` = `<APP_ID>`
 - `AZURE_TENANT_ID` = `<TENANT_ID>`
@@ -41,26 +37,22 @@ Set these first so workflows can authenticate:
 
 ## 4. Run Backend Setup Workflow
 
-In GitHub Actions, run workflow: **Backend Setup** (`.github/workflows/backend-setup.yml`)
+Run **Backend Setup** workflow with inputs:
 
-Inputs:
+- `location`
+- `backend_resource_group`
+- `storage_account_prefix`
+- `container_name`
+- `state_key`
 
-- `location` (example `eastus2`)
-- `backend_resource_group` (example `rg-tfstate-prod-eus2`)
-- `storage_account_prefix` (example `tfstate`)
-- `container_name` (example `tfstate`)
-- `state_key` (example `governance.terraform.tfstate`)
-
-Workflow outputs values in Step Summary for:
+Copy output values from workflow summary and set:
 
 - `TFSTATE_RESOURCE_GROUP`
 - `TFSTATE_STORAGE_ACCOUNT`
 - `TFSTATE_CONTAINER`
 - `TFSTATE_KEY`
 
-Add these as GitHub repository variables.
-
-## 5. Grant Backend Storage Access to Service Principal
+## 5. Grant Backend Access
 
 ```bash
 RG_NAME="<TFSTATE_RESOURCE_GROUP>"
@@ -75,9 +67,9 @@ az role assignment create \
   --scope "$SA_ID"
 ```
 
-## 6. Assign Governance Roles by Scope
+## 6. Assign Governance Roles By Scope
 
-Resource-group scope example (`Lekhika_RG`):
+Resource-group scope (`Lekhika_RG`) example:
 
 ```bash
 RG_NAME="Lekhika_RG"
@@ -123,7 +115,9 @@ az role assignment create \
   --scope "/providers/Microsoft.Management/managementGroups/$MG_ID"
 ```
 
-## 7. Set Required Terraform Repository Variables
+## 7. Configure Terraform Defaults
+
+Set repository variables:
 
 - `TF_VAR_ORG_PREFIX`
 - `TF_VAR_ENVIRONMENT`
@@ -139,22 +133,33 @@ Optional:
 - `TF_VAR_DEPLOY_FREE_APP_SERVICE`
 - `TF_VAR_APP_SERVICE_NAME_PREFIX`
 
-## 8. Deploy via GitHub Actions
+## 8. Configure Approval Gates
 
-- Open PR to `main` and verify `terraform-plan` success.
-- Merge PR to trigger `terraform-apply`.
+Create GitHub environments:
 
-## 9. Validate Deployment
+- `terraform-apply`
+- `terraform-destroy`
 
-Resource-group scope check:
+Add required reviewers so apply/destroy pause for approval.
 
-```bash
-az policy assignment list \
-  --scope "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/Lekhika_RG" \
-  --query "[].{name:name,displayName:displayName}" -o table
-```
+## 9. Run Governance Workflow
 
-Subscription scope check:
+Run workflow `.github/workflows/terraform-governance.yml` with operation:
+
+- `plan`
+- `apply`
+- `destroy`
+
+Optional per-run overrides in workflow inputs:
+
+- `org_prefix`
+- `environment`
+- `region_code`
+- `location`
+
+## 10. Validate and Troubleshoot
+
+Validate policy assignments:
 
 ```bash
 az policy assignment list \
@@ -162,18 +167,6 @@ az policy assignment list \
   --query "[].{name:name,displayName:displayName}" -o table
 ```
 
-## 10. Local Validation and Destroy (Optional)
+Common login issue:
 
-```bash
-cp terraform.tfvars.example terraform.tfvars
-./preflight.sh
-terraform init \
-  -backend-config="resource_group_name=<TFSTATE_RESOURCE_GROUP>" \
-  -backend-config="storage_account_name=<TFSTATE_STORAGE_ACCOUNT>" \
-  -backend-config="container_name=<TFSTATE_CONTAINER>" \
-  -backend-config="key=governance.terraform.tfstate"
-terraform plan -out tfplan
-terraform apply tfplan
-terraform plan -destroy -out destroy.tfplan
-terraform apply destroy.tfplan
-```
+- `client-id` / `tenant-id` missing: ensure `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID` are set as repo variables or secrets.
