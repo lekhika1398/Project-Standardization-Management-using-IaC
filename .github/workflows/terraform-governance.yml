@@ -13,21 +13,21 @@ on:
           - apply
           - destroy
       org_prefix:
-        description: "Override org_prefix for this run (optional)"
+        description: "org_prefix value for this run"
         required: false
-        default: ""
+        default: "lekhika"
       environment:
-        description: "Override environment for this run (optional)"
+        description: "environment value for this run"
         required: false
-        default: ""
+        default: "dev"
       region_code:
-        description: "Override region_code for this run (optional)"
+        description: "region_code value for this run"
         required: false
-        default: ""
+        default: "eus2"
       location:
-        description: "Override location for this run (optional)"
+        description: "location value for this run"
         required: false
-        default: ""
+        default: "eastus2"
       tfvars_file:
         description: "Optional tfvars file path in repo (example: dev.tfvars)"
         required: false
@@ -49,10 +49,10 @@ env:
   TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER != '' && vars.TFSTATE_CONTAINER || secrets.TFSTATE_CONTAINER }}
   TFSTATE_KEY: ${{ vars.TFSTATE_KEY != '' && vars.TFSTATE_KEY || secrets.TFSTATE_KEY }}
   TF_VAR_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-  TF_VAR_org_prefix: ${{ inputs.org_prefix != '' && inputs.org_prefix || vars.TF_VAR_ORG_PREFIX }}
-  TF_VAR_environment: ${{ inputs.environment != '' && inputs.environment || vars.TF_VAR_ENVIRONMENT }}
-  TF_VAR_region_code: ${{ inputs.region_code != '' && inputs.region_code || vars.TF_VAR_REGION_CODE }}
-  TF_VAR_location: ${{ inputs.location != '' && inputs.location || vars.TF_VAR_LOCATION }}
+  TF_VAR_org_prefix: ${{ inputs.org_prefix != '' && inputs.org_prefix || vars.TF_VAR_ORG_PREFIX != '' && vars.TF_VAR_ORG_PREFIX || 'lekhika' }}
+  TF_VAR_environment: ${{ inputs.environment != '' && inputs.environment || vars.TF_VAR_ENVIRONMENT != '' && vars.TF_VAR_ENVIRONMENT || 'dev' }}
+  TF_VAR_region_code: ${{ inputs.region_code != '' && inputs.region_code || vars.TF_VAR_REGION_CODE != '' && vars.TF_VAR_REGION_CODE || 'eus2' }}
+  TF_VAR_location: ${{ inputs.location != '' && inputs.location || vars.TF_VAR_LOCATION != '' && vars.TF_VAR_LOCATION || 'eastus2' }}
 
 jobs:
   terraform-plan:
