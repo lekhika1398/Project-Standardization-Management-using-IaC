@@ -31,6 +31,11 @@ permissions:
 jobs:
   setup-backend:
     runs-on: ubuntu-latest
+    outputs:
+      TFSTATE_RESOURCE_GROUP: ${{ steps.backend.outputs.tfstate_resource_group }}
+      TFSTATE_STORAGE_ACCOUNT: ${{ steps.backend.outputs.tfstate_storage_account }}
+      TFSTATE_CONTAINER: ${{ steps.backend.outputs.tfstate_container }}
+      TFSTATE_KEY: ${{ steps.backend.outputs.tfstate_key }}
     env:
       AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
@@ -102,18 +107,35 @@ jobs:
           echo "tfstate_container=$CONTAINER_NAME" >> "$GITHUB_OUTPUT"
           echo "tfstate_key=$STATE_KEY" >> "$GITHUB_OUTPUT"
 
+      - name: Backend Output Variables
+        shell: bash
+        run: |
+          echo "TFSTATE_RESOURCE_GROUP=${{ steps.backend.outputs.tfstate_resource_group }}"
+          echo "TFSTATE_STORAGE_ACCOUNT=${{ steps.backend.outputs.tfstate_storage_account }}"
+          echo "TFSTATE_CONTAINER=${{ steps.backend.outputs.tfstate_container }}"
+          echo "TFSTATE_KEY=${{ steps.backend.outputs.tfstate_key }}"
+
       - name: Backend Setup Summary
         shell: bash
         run: |
           {
             echo "## Backend Setup Completed"
             echo
-            echo "Use these values in GitHub Repository Variables:"
+            echo "Use these values in GitHub Repository Variables or Secrets:"
             echo
             echo "- TFSTATE_RESOURCE_GROUP: \\`${{ steps.backend.outputs.tfstate_resource_group }}\\`"
             echo "- TFSTATE_STORAGE_ACCOUNT: \\`${{ steps.backend.outputs.tfstate_storage_account }}\\`"
             echo "- TFSTATE_CONTAINER: \\`${{ steps.backend.outputs.tfstate_container }}\\`"
             echo "- TFSTATE_KEY: \\`${{ steps.backend.outputs.tfstate_key }}\\`"
+            echo
+            echo "### Copy/Paste Block"
+            echo
+            echo "\`\`\`env"
+            echo "TFSTATE_RESOURCE_GROUP=${{ steps.backend.outputs.tfstate_resource_group }}"
+            echo "TFSTATE_STORAGE_ACCOUNT=${{ steps.backend.outputs.tfstate_storage_account }}"
+            echo "TFSTATE_CONTAINER=${{ steps.backend.outputs.tfstate_container }}"
+            echo "TFSTATE_KEY=${{ steps.backend.outputs.tfstate_key }}"
+            echo "\`\`\`"
             echo
             echo "Azure identity variables required for all workflows:"
             echo

@@ -139,7 +139,9 @@ jobs:
             -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
             -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
             -backend-config="container_name=${{ env.TFSTATE_CONTAINER }}" \
-            -backend-config="key=${{ env.TFSTATE_KEY }}"
+            -backend-config="key=${{ env.TFSTATE_KEY }}" \
+            -backend-config="use_oidc=true" \
+            -backend-config="use_azuread_auth=true"
 
       - name: Terraform Fmt
         run: terraform fmt -check -recursive
@@ -259,7 +261,9 @@ jobs:
             -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
             -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
             -backend-config="container_name=${{ env.TFSTATE_CONTAINER }}" \
-            -backend-config="key=${{ env.TFSTATE_KEY }}"
+            -backend-config="key=${{ env.TFSTATE_KEY }}" \
+            -backend-config="use_oidc=true" \
+            -backend-config="use_azuread_auth=true"
 
       - name: Terraform Plan (Apply Preview)
         run: |
@@ -364,7 +368,9 @@ jobs:
             -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
             -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
             -backend-config="container_name=${{ env.TFSTATE_CONTAINER }}" \
-            -backend-config="key=${{ env.TFSTATE_KEY }}"
+            -backend-config="key=${{ env.TFSTATE_KEY }}" \
+            -backend-config="use_oidc=true" \
+            -backend-config="use_azuread_auth=true"
 
       - name: Terraform Destroy Plan
         run: |
