@@ -1,5 +1,5 @@
 variable "subscription_id" {
-  description = "Target Azure subscription ID. Leave empty to use the authenticated subscription context."
+  description = "Target Azure subscription ID. Leave empty to use the authenticated context."
   type        = string
   default     = ""
 }
@@ -20,24 +20,58 @@ variable "region_code" {
 }
 
 variable "location" {
-  description = "Azure location used for deployable resources and policy assignments."
+  description = "Azure location for deployable resources (resource group and app service)."
   type        = string
 }
 
+variable "policy_scope_type" {
+  description = "Policy assignment scope type. Allowed values: resource_group, subscription, management_group."
+  type        = string
+  default     = "resource_group"
+
+  validation {
+    condition     = contains(["resource_group", "subscription", "management_group"], var.policy_scope_type)
+    error_message = "policy_scope_type must be one of: resource_group, subscription, management_group."
+  }
+}
+
+variable "management_group_id" {
+  description = "Management group ID (required when policy_scope_type is management_group)."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.policy_scope_type != "management_group" || trimspace(var.management_group_id) != ""
+    error_message = "management_group_id must be set when policy_scope_type is management_group."
+  }
+}
+
 variable "policy_assignment_location" {
-  description = "Location for subscription policy assignments."
+  description = "Location for policy assignments where a location is required."
   type        = string
   default     = "eastus"
 }
 
+variable "create_governance_resource_group" {
+  description = "When true, create the governance resource group; when false, use an existing one."
+  type        = bool
+  default     = true
+}
+
+variable "governance_resource_group_name" {
+  description = "Resource group name used for governance resources and optional resource-group assignment scope."
+  type        = string
+  default     = "Lekhika_RG"
+}
+
 variable "mandatory_tags" {
-  description = "Mandatory tags used on sample resources."
+  description = "Mandatory tags used on managed resources."
   type        = list(string)
   default     = ["Environment", "Owner"]
 }
 
 variable "default_tags" {
-  description = "Default tags merged onto sample resources."
+  description = "Default tags merged onto managed resources."
   type        = map(string)
   default     = {}
 }
@@ -48,14 +82,14 @@ variable "policy_assignment_parameters" {
   default     = {}
 }
 
-variable "deploy_sample_resource_group" {
-  description = "When true, deploys a sample resource group to validate governance controls."
+variable "deploy_free_app_service" {
+  description = "When true, deploy a free tier App Service Plan and Web App in the governance resource group."
   type        = bool
   default     = true
 }
 
-variable "resource_group_instance" {
-  description = "Optional naming instance suffix for the sample resource group."
+variable "app_service_name_prefix" {
+  description = "Prefix used to build a globally unique App Service name."
   type        = string
-  default     = "001"
+  default     = "lekhika-webapp"
 }

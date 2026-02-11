@@ -1,11 +1,19 @@
-subscription_id              = ""
-org_prefix                   = "contoso"
-environment                  = "prod"
-region_code                  = "eus2"
-location                     = "eastus2"
-policy_assignment_location   = "eastus"
-deploy_sample_resource_group = true
-resource_group_instance      = "001"
+subscription_id                 = ""
+org_prefix                      = "contoso"
+environment                     = "prod"
+region_code                     = "eus2"
+location                        = "eastus2"
+
+# Scope options: resource_group | subscription | management_group
+policy_scope_type               = "resource_group"
+management_group_id             = ""
+policy_assignment_location      = "eastus"
+
+create_governance_resource_group = true
+governance_resource_group_name   = "Lekhika_RG"
+
+deploy_free_app_service         = true
+app_service_name_prefix         = "lekhika-webapp"
 
 mandatory_tags = [
   "Environment",

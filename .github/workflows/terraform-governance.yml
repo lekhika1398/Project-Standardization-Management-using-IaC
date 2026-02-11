@@ -16,6 +16,11 @@ env:
   TF_IN_AUTOMATION: true
   TF_INPUT: false
   WORKING_DIR: .
+  TF_VAR_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_org_prefix: ${{ vars.TF_VAR_ORG_PREFIX }}
+  TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
+  TF_VAR_region_code: ${{ vars.TF_VAR_REGION_CODE }}
+  TF_VAR_location: ${{ vars.TF_VAR_LOCATION }}
 
 jobs:
   terraform-plan:
@@ -29,6 +34,72 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate Required Repository Variables
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP }}
+          TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
+          TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER }}
+          TFSTATE_KEY: ${{ vars.TFSTATE_KEY }}
+          TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
+          TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
+          TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
+          TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
+        run: |
+          set -euo pipefail
+          required=(
+            AZURE_CLIENT_ID
+            AZURE_TENANT_ID
+            AZURE_SUBSCRIPTION_ID
+            TFSTATE_RESOURCE_GROUP
+            TFSTATE_STORAGE_ACCOUNT
+            TFSTATE_CONTAINER
+            TFSTATE_KEY
+            TF_VAR_ORG_PREFIX
+            TF_VAR_ENVIRONMENT
+            TF_VAR_REGION_CODE
+            TF_VAR_LOCATION
+          )
+          for key in "${required[@]}"; do
+            if [ -z "${!key}" ]; then
+              echo "Missing required repository variable: $key"
+              exit 1
+            fi
+          done
+
+      - name: Build Optional Terraform Variables
+        env:
+          TF_VAR_POLICY_SCOPE_TYPE: ${{ vars.TF_VAR_POLICY_SCOPE_TYPE }}
+          TF_VAR_MANAGEMENT_GROUP_ID: ${{ vars.TF_VAR_MANAGEMENT_GROUP_ID }}
+          TF_VAR_GOVERNANCE_RG_NAME: ${{ vars.TF_VAR_GOVERNANCE_RG_NAME }}
+          TF_VAR_CREATE_GOVERNANCE_RG: ${{ vars.TF_VAR_CREATE_GOVERNANCE_RG }}
+          TF_VAR_DEPLOY_FREE_APP_SERVICE: ${{ vars.TF_VAR_DEPLOY_FREE_APP_SERVICE }}
+          TF_VAR_APP_SERVICE_NAME_PREFIX: ${{ vars.TF_VAR_APP_SERVICE_NAME_PREFIX }}
+        run: |
+          set -euo pipefail
+          rm -f ci.auto.tfvars
+
+          if [ -n "$TF_VAR_POLICY_SCOPE_TYPE" ]; then
+            echo "policy_scope_type = \"$TF_VAR_POLICY_SCOPE_TYPE\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_MANAGEMENT_GROUP_ID" ]; then
+            echo "management_group_id = \"$TF_VAR_MANAGEMENT_GROUP_ID\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_GOVERNANCE_RG_NAME" ]; then
+            echo "governance_resource_group_name = \"$TF_VAR_GOVERNANCE_RG_NAME\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_CREATE_GOVERNANCE_RG" ]; then
+            echo "create_governance_resource_group = $TF_VAR_CREATE_GOVERNANCE_RG" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_DEPLOY_FREE_APP_SERVICE" ]; then
+            echo "deploy_free_app_service = $TF_VAR_DEPLOY_FREE_APP_SERVICE" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_APP_SERVICE_NAME_PREFIX" ]; then
+            echo "app_service_name_prefix = \"$TF_VAR_APP_SERVICE_NAME_PREFIX\"" >> ci.auto.tfvars
+          fi
+
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -39,7 +110,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: '1.6.6'
+          terraform_version: "1.6.6"
 
       - name: Terraform Init
         run: |
@@ -69,6 +140,72 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate Required Repository Variables
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP }}
+          TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
+          TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER }}
+          TFSTATE_KEY: ${{ vars.TFSTATE_KEY }}
+          TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
+          TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
+          TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
+          TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
+        run: |
+          set -euo pipefail
+          required=(
+            AZURE_CLIENT_ID
+            AZURE_TENANT_ID
+            AZURE_SUBSCRIPTION_ID
+            TFSTATE_RESOURCE_GROUP
+            TFSTATE_STORAGE_ACCOUNT
+            TFSTATE_CONTAINER
+            TFSTATE_KEY
+            TF_VAR_ORG_PREFIX
+            TF_VAR_ENVIRONMENT
+            TF_VAR_REGION_CODE
+            TF_VAR_LOCATION
+          )
+          for key in "${required[@]}"; do
+            if [ -z "${!key}" ]; then
+              echo "Missing required repository variable: $key"
+              exit 1
+            fi
+          done
+
+      - name: Build Optional Terraform Variables
+        env:
+          TF_VAR_POLICY_SCOPE_TYPE: ${{ vars.TF_VAR_POLICY_SCOPE_TYPE }}
+          TF_VAR_MANAGEMENT_GROUP_ID: ${{ vars.TF_VAR_MANAGEMENT_GROUP_ID }}
+          TF_VAR_GOVERNANCE_RG_NAME: ${{ vars.TF_VAR_GOVERNANCE_RG_NAME }}
+          TF_VAR_CREATE_GOVERNANCE_RG: ${{ vars.TF_VAR_CREATE_GOVERNANCE_RG }}
+          TF_VAR_DEPLOY_FREE_APP_SERVICE: ${{ vars.TF_VAR_DEPLOY_FREE_APP_SERVICE }}
+          TF_VAR_APP_SERVICE_NAME_PREFIX: ${{ vars.TF_VAR_APP_SERVICE_NAME_PREFIX }}
+        run: |
+          set -euo pipefail
+          rm -f ci.auto.tfvars
+
+          if [ -n "$TF_VAR_POLICY_SCOPE_TYPE" ]; then
+            echo "policy_scope_type = \"$TF_VAR_POLICY_SCOPE_TYPE\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_MANAGEMENT_GROUP_ID" ]; then
+            echo "management_group_id = \"$TF_VAR_MANAGEMENT_GROUP_ID\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_GOVERNANCE_RG_NAME" ]; then
+            echo "governance_resource_group_name = \"$TF_VAR_GOVERNANCE_RG_NAME\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_CREATE_GOVERNANCE_RG" ]; then
+            echo "create_governance_resource_group = $TF_VAR_CREATE_GOVERNANCE_RG" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_DEPLOY_FREE_APP_SERVICE" ]; then
+            echo "deploy_free_app_service = $TF_VAR_DEPLOY_FREE_APP_SERVICE" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_APP_SERVICE_NAME_PREFIX" ]; then
+            echo "app_service_name_prefix = \"$TF_VAR_APP_SERVICE_NAME_PREFIX\"" >> ci.auto.tfvars
+          fi
+
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -79,7 +216,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: '1.6.6'
+          terraform_version: "1.6.6"
 
       - name: Terraform Init
         run: |

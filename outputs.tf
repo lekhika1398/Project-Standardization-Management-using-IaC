@@ -12,19 +12,30 @@ output "policy_definition_ids" {
 }
 
 output "policy_assignment_ids" {
-  description = "Subscription policy assignment IDs by policy key."
-  value = {
-    for policy_key, assignment in azurerm_subscription_policy_assignment.this :
-    policy_key => assignment.id
-  }
+  description = "Policy assignment IDs by policy key for the selected scope type."
+  value = merge(
+    { for policy_key, assignment in azurerm_resource_group_policy_assignment.this : policy_key => assignment.id },
+    { for policy_key, assignment in azurerm_subscription_policy_assignment.this : policy_key => assignment.id },
+    { for policy_key, assignment in azurerm_management_group_policy_assignment.this : policy_key => assignment.id }
+  )
 }
 
-output "generated_resource_group_name" {
-  description = "Generated resource group name from naming module."
-  value       = module.naming_resource_group.resource_name
+output "governance_resource_group_name" {
+  description = "Governance resource group name."
+  value       = module.governance_resource_group.name
 }
 
-output "sample_resource_group_id" {
-  description = "Sample resource group ID when deployment is enabled."
-  value       = var.deploy_sample_resource_group ? module.sample_resource_group[0].id : null
+output "governance_resource_group_id" {
+  description = "Governance resource group ID."
+  value       = module.governance_resource_group.id
+}
+
+output "free_app_service_name" {
+  description = "Free App Service name when deployment is enabled."
+  value       = module.governance_resource_group.app_service_name
+}
+
+output "free_app_service_id" {
+  description = "Free App Service ID when deployment is enabled."
+  value       = module.governance_resource_group.app_service_id
 }

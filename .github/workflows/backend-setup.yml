@@ -1,0 +1,127 @@
+name: Backend Setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      location:
+        description: "Azure region for backend resources"
+        required: true
+        default: "eastus2"
+      backend_resource_group:
+        description: "Resource group name for Terraform state backend"
+        required: true
+        default: "rg-tfstate-prod-eus2"
+      storage_account_prefix:
+        description: "Lowercase alphanumeric prefix for storage account (<= 18 chars)"
+        required: true
+        default: "tfstate"
+      container_name:
+        description: "Blob container name for state"
+        required: true
+        default: "tfstate"
+      state_key:
+        description: "Terraform state key"
+        required: true
+        default: "governance.terraform.tfstate"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  setup-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate Azure CLI
+        run: az version
+
+      - name: Create Backend Resources
+        id: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LOCATION="${{ inputs.location }}"
+          RG_NAME="${{ inputs.backend_resource_group }}"
+          SA_PREFIX="${{ inputs.storage_account_prefix }}"
+          CONTAINER_NAME="${{ inputs.container_name }}"
+          STATE_KEY="${{ inputs.state_key }}"
+
+          # Storage account naming rules: 3-24 chars, lowercase letters and numbers only.
+          CLEAN_PREFIX="$(echo "$SA_PREFIX" | tr -cd 'a-z0-9' | cut -c1-18)"
+          if [ -z "$CLEAN_PREFIX" ]; then
+            echo "storage_account_prefix must contain lowercase letters or numbers"
+            exit 1
+          fi
+
+          UNIQUE_SUFFIX="$(date +%s | tail -c 7)"
+          SA_NAME="${CLEAN_PREFIX}${UNIQUE_SUFFIX}"
+          SA_NAME="$(echo "$SA_NAME" | cut -c1-24)"
+
+          az group create \
+            --name "$RG_NAME" \
+            --location "$LOCATION" \
+            --output none
+
+          az storage account create \
+            --name "$SA_NAME" \
+            --resource-group "$RG_NAME" \
+            --location "$LOCATION" \
+            --sku Standard_LRS \
+            --kind StorageV2 \
+            --allow-blob-public-access false \
+            --min-tls-version TLS1_2 \
+            --output none
+
+          az storage container create \
+            --name "$CONTAINER_NAME" \
+            --account-name "$SA_NAME" \
+            --auth-mode login \
+            --output none
+
+          echo "tfstate_resource_group=$RG_NAME" >> "$GITHUB_OUTPUT"
+          echo "tfstate_storage_account=$SA_NAME" >> "$GITHUB_OUTPUT"
+          echo "tfstate_container=$CONTAINER_NAME" >> "$GITHUB_OUTPUT"
+          echo "tfstate_key=$STATE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Backend Setup Summary
+        shell: bash
+        run: |
+          {
+            echo "## Backend Setup Completed"
+            echo
+            echo "Use these values in GitHub Repository Variables:"
+            echo
+            echo "- TFSTATE_RESOURCE_GROUP: \\`${{ steps.backend.outputs.tfstate_resource_group }}\\`"
+            echo "- TFSTATE_STORAGE_ACCOUNT: \\`${{ steps.backend.outputs.tfstate_storage_account }}\\`"
+            echo "- TFSTATE_CONTAINER: \\`${{ steps.backend.outputs.tfstate_container }}\\`"
+            echo "- TFSTATE_KEY: \\`${{ steps.backend.outputs.tfstate_key }}\\`"
+            echo
+            echo "Azure identity variables required for all workflows:"
+            echo
+            echo "- AZURE_CLIENT_ID"
+            echo "- AZURE_TENANT_ID"
+            echo "- AZURE_SUBSCRIPTION_ID"
+            echo
+            echo "Terraform required variables:"
+            echo
+            echo "- TF_VAR_ORG_PREFIX"
+            echo "- TF_VAR_ENVIRONMENT"
+            echo "- TF_VAR_REGION_CODE"
+            echo "- TF_VAR_LOCATION"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Print Copy Commands
+        shell: bash
+        run: |
+          echo "gh variable set TFSTATE_RESOURCE_GROUP --body '${{ steps.backend.outputs.tfstate_resource_group }}'"
+          echo "gh variable set TFSTATE_STORAGE_ACCOUNT --body '${{ steps.backend.outputs.tfstate_storage_account }}'"
+          echo "gh variable set TFSTATE_CONTAINER --body '${{ steps.backend.outputs.tfstate_container }}'"
+          echo "gh variable set TFSTATE_KEY --body '${{ steps.backend.outputs.tfstate_key }}'"
