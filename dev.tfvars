@@ -11,10 +11,10 @@ management_group_id        = ""
 policy_assignment_location = "eastus"
 
 # Optional
-create_deployment_resource_group = true
 deployment_resource_group_name   = "lekhika-dev-rg-eus2"
 
 # Optional
+deploy_app_service       = true
 app_service_plan_sku_name = "B1"
 app_service_name_prefix   = "lekhika-dev-webapp"
 

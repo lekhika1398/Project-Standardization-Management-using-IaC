@@ -17,16 +17,15 @@ locals {
 module "deployment_resource_group" {
   source = "./modules/resource-group"
 
-  create_resource_group = var.create_deployment_resource_group
-  rg_name               = var.deployment_resource_group_name
-  location              = var.location
-  tags                  = local.governance_tags
+  rg_name   = var.deployment_resource_group_name
+  location  = var.location
+  tags      = local.governance_tags
 }
 
-module "governance_app_service" {
+module "app_service" {
   source = "./modules/app-service"
 
-  deploy                  = var.deploy_free_app_service
+  deploy                  = var.deploy_app_service
   service_plan_sku_name   = var.app_service_plan_sku_name
   resource_group_name     = module.deployment_resource_group.name
   location                = module.deployment_resource_group.location

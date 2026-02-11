@@ -132,8 +132,7 @@ Set deployment values in your tfvars file (for example `dev.tfvars`), including:
 - `policy_scope_type`
 - `management_group_id` (when needed)
 - `deployment_resource_group_name`
-- `create_deployment_resource_group`
-- `deploy_free_app_service`
+- `deploy_app_service`
 - `app_service_plan_sku_name`
 - `app_service_name_prefix`
 

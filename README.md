@@ -101,3 +101,8 @@ Terraform deployment values are sourced from the selected tfvars file (for examp
 - `management_group`: governance at scale across subscriptions.
 
 Use `subscription` or `management_group` scope for resource-group naming policy enforcement.
+
+## Extensibility Model
+
+- Add policies by creating a new folder under `policies/` with `definition.json` and `policy.tf`.
+- Add new resource types by creating a new module under `modules/` and wiring one module block in `main.tf`.

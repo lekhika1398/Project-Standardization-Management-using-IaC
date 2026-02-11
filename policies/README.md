@@ -30,6 +30,8 @@ policies/require-diagnostics/
 
 No updates are required in root Terraform files (`main.tf`, `variables.tf`, or workflow).
 
+This folder contract is intentionally stable so policy teams can ship new controls independently of the core deployment pipeline.
+
 ## Parameter Override Pattern
 
 ```hcl

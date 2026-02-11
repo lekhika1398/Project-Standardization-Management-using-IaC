@@ -42,21 +42,20 @@ All governance variables are read from the selected tfvars file.
 
 ## 4. Configure Policy Scope
 
-Set default scope by repository variable `TF_VAR_POLICY_SCOPE_TYPE`:
+Set `policy_scope_type` in your tfvars file:
 
 - `resource_group`
 - `subscription`
 - `management_group`
 
-If using `management_group`, also set `TF_VAR_MANAGEMENT_GROUP_ID`.
+If using `management_group`, also set `management_group_id` in tfvars.
 
 ## 5. Configure Deployment Resource Group
 
 Configure these in your tfvars file:
 
 - `deployment_resource_group_name`
-- `create_deployment_resource_group`
-- `deploy_free_app_service`
+- `deploy_app_service`
 - `app_service_plan_sku_name` (for example: `B1`, `S1`, `F1`)
 - `app_service_name_prefix`
 
@@ -69,13 +68,21 @@ Configure these in your tfvars file:
 
 No root Terraform changes are required.
 
-## 7. Validate Locally (Optional)
+## 7. Add More Resource Types
+
+1. Create a new module under `modules/<resource-type>/`.
+2. Add required variables/outputs in that module.
+3. Add one module block in `main.tf` using values from tfvars.
+4. Add outputs in `outputs.tf` if needed for downstream usage.
+5. Run `./preflight.sh` and deploy.
+
+## 8. Validate Locally (Optional)
 
 ```bash
 ./preflight.sh
 ```
 
-## 8. Local Terraform Commands (Optional)
+## 9. Local Terraform Commands (Optional)
 
 ```bash
 terraform init \

@@ -23,12 +23,12 @@ output "deployment_resource_group_id" {
   value       = module.deployment_resource_group.id
 }
 
-output "free_app_service_name" {
-  description = "Free App Service name when deployment is enabled."
-  value       = module.governance_app_service.app_service_name
+output "app_service_name" {
+  description = "App Service name when deployment is enabled."
+  value       = module.app_service.app_service_name
 }
 
-output "free_app_service_id" {
-  description = "Free App Service ID when deployment is enabled."
-  value       = module.governance_app_service.app_service_id
+output "app_service_id" {
+  description = "App Service ID when deployment is enabled."
+  value       = module.app_service.app_service_id
 }
