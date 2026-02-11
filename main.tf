@@ -14,11 +14,11 @@ locals {
   management_group_scope_id = var.management_group_id != "" ? "/providers/Microsoft.Management/managementGroups/${var.management_group_id}" : null
 }
 
-module "governance_resource_group" {
+module "deployment_resource_group" {
   source = "./modules/resource-group"
 
-  create_resource_group = var.create_governance_resource_group
-  rg_name               = var.governance_resource_group_name
+  create_resource_group = var.create_deployment_resource_group
+  rg_name               = var.deployment_resource_group_name
   location              = var.location
   tags                  = local.governance_tags
 }
@@ -28,8 +28,8 @@ module "governance_app_service" {
 
   deploy                  = var.deploy_free_app_service
   service_plan_sku_name   = var.app_service_plan_sku_name
-  resource_group_name     = module.governance_resource_group.name
-  location                = module.governance_resource_group.location
+  resource_group_name     = module.deployment_resource_group.name
+  location                = module.deployment_resource_group.location
   tags                    = local.governance_tags
   app_service_name_prefix = var.app_service_name_prefix
   environment             = var.environment
@@ -44,7 +44,7 @@ module "policy_engine" {
   region_code                  = var.region_code
   policy_scope_type            = var.policy_scope_type
   subscription_scope_id        = local.subscription_scope_id
-  resource_group_scope_id      = module.governance_resource_group.id
+  resource_group_scope_id      = module.deployment_resource_group.id
   management_group_scope_id    = local.management_group_scope_id
   policy_assignment_location   = var.policy_assignment_location
   policy_assignment_parameters = var.policy_assignment_parameters

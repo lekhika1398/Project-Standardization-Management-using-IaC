@@ -19,7 +19,7 @@ Production-ready Azure governance template using Terraform, Azure Policy, and Gi
   - `resource_group`
   - `subscription`
   - `management_group`
-- Governance resource group support (`Lekhika_RG` default)
+- Deployment resource group support (`Lekhika_RG` default)
 - Optional App Service deployment with configurable plan SKU (default `B1`)
 - Manual run workflow with operation choice: `plan`, `apply`, `destroy`
 - Approval-gated apply and destroy using GitHub Environments

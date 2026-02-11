@@ -131,8 +131,8 @@ Set deployment values in your tfvars file (for example `dev.tfvars`), including:
 - `location`
 - `policy_scope_type`
 - `management_group_id` (when needed)
-- `governance_resource_group_name`
-- `create_governance_resource_group`
+- `deployment_resource_group_name`
+- `create_deployment_resource_group`
 - `deploy_free_app_service`
 - `app_service_plan_sku_name`
 - `app_service_name_prefix`
@@ -167,9 +167,9 @@ All governance variables are sourced from the selected tfvars file.
 
 `dev.tfvars` profile behavior:
 
-- Creates a new governance resource group (`lekhika-dev-rg-eus2`)
+- Creates a new deployment resource group (`lekhika-dev-rg-eus2`)
 - Sets policy scope to `resource_group`
-- Assigns policies to that governance resource group
+- Assigns policies to that deployment resource group
 
 ## 10. Validate and Troubleshoot
 

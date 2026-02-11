@@ -13,14 +13,14 @@ output "policy_assignment_ids" {
   value       = module.policy_engine.policy_assignment_ids
 }
 
-output "governance_resource_group_name" {
-  description = "Governance resource group name."
-  value       = module.governance_resource_group.name
+output "deployment_resource_group_name" {
+  description = "Deployment resource group name."
+  value       = module.deployment_resource_group.name
 }
 
-output "governance_resource_group_id" {
-  description = "Governance resource group ID."
-  value       = module.governance_resource_group.id
+output "deployment_resource_group_id" {
+  description = "Deployment resource group ID."
+  value       = module.deployment_resource_group.id
 }
 
 output "free_app_service_name" {

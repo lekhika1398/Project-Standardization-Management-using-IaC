@@ -30,7 +30,7 @@ Run workflow `.github/workflows/terraform-governance.yml` and choose `operation`
 - `apply`: runs plan first, then applies saved plan after `terraform-ops` environment approval
 - `destroy`: runs destroy plan first, then applies saved destroy plan after `terraform-ops` environment approval
 
-Default `tfvars_file` is `dev.tfvars`, which creates a new governance resource group and assigns policies to that resource group.
+Default `tfvars_file` is `dev.tfvars`, which creates a new deployment resource group and assigns policies to that resource group.
 
 ## 3. Pass Variables at Runtime
 
@@ -50,12 +50,12 @@ Set default scope by repository variable `TF_VAR_POLICY_SCOPE_TYPE`:
 
 If using `management_group`, also set `TF_VAR_MANAGEMENT_GROUP_ID`.
 
-## 5. Configure Governance Resource Group
+## 5. Configure Deployment Resource Group
 
 Configure these in your tfvars file:
 
-- `governance_resource_group_name`
-- `create_governance_resource_group`
+- `deployment_resource_group_name`
+- `create_deployment_resource_group`
 - `deploy_free_app_service`
 - `app_service_plan_sku_name` (for example: `B1`, `S1`, `F1`)
 - `app_service_name_prefix`

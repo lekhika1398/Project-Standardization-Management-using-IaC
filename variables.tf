@@ -47,14 +47,14 @@ variable "policy_assignment_location" {
   default     = "eastus"
 }
 
-variable "create_governance_resource_group" {
-  description = "When true, create the governance resource group; when false, use an existing one."
+variable "create_deployment_resource_group" {
+  description = "When true, create the deployment resource group; when false, use an existing one."
   type        = bool
   default     = true
 }
 
-variable "governance_resource_group_name" {
-  description = "Resource group name used for governance resources and optional resource-group assignment scope."
+variable "deployment_resource_group_name" {
+  description = "Resource group name used for resource deployment and resource-group policy assignment scope."
   type        = string
   default     = "Lekhika_RG"
 }
@@ -78,7 +78,7 @@ variable "policy_assignment_parameters" {
 }
 
 variable "deploy_free_app_service" {
-  description = "When true, deploy an App Service Plan and Web App in the governance resource group."
+  description = "When true, deploy an App Service Plan and Web App in the deployment resource group."
   type        = bool
   default     = true
 }
