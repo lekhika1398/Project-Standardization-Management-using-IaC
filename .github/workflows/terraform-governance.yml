@@ -12,10 +12,6 @@ on:
           - plan
           - apply
           - destroy
-      destroy_confirmation:
-        description: "Type DESTROY to confirm destroy operation"
-        required: false
-        default: ""
 
 permissions:
   id-token: write
@@ -280,7 +276,7 @@ jobs:
         run: terraform apply -no-color -auto-approve apply.tfplan
 
   terraform-destroy:
-    if: ${{ inputs.operation == 'destroy' && inputs.destroy_confirmation == 'DESTROY' }}
+    if: ${{ inputs.operation == 'destroy' }}
     runs-on: ubuntu-latest
     environment: terraform-destroy
     defaults:
