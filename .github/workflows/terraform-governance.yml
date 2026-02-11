@@ -61,8 +61,12 @@ env:
 
 jobs:
   terraform-plan:
-    if: ${{ inputs.operation == 'plan' }}
     runs-on: ubuntu-latest
+    outputs:
+      plan_file: ${{ steps.plan_meta.outputs.plan_file }}
+      plan_text_file: ${{ steps.plan_meta.outputs.plan_text_file }}
+      plan_artifact_name: ${{ steps.plan_meta.outputs.plan_artifact_name }}
+      plan_title: ${{ steps.plan_meta.outputs.plan_title }}
     defaults:
       run:
         shell: bash
@@ -119,6 +123,21 @@ jobs:
           fi
           if [ -n "$TF_VAR_APP_SERVICE_NAME_PREFIX" ]; then
             echo "app_service_name_prefix = \"$TF_VAR_APP_SERVICE_NAME_PREFIX\"" >> ci.auto.tfvars
+          fi
+
+      - name: Resolve Plan Metadata
+        id: plan_meta
+        run: |
+          if [ "${{ inputs.operation }}" = "destroy" ]; then
+            echo "plan_file=destroy.tfplan" >> "$GITHUB_OUTPUT"
+            echo "plan_text_file=destroy-plan.txt" >> "$GITHUB_OUTPUT"
+            echo "plan_artifact_name=terraform-plan-destroy" >> "$GITHUB_OUTPUT"
+            echo "plan_title=Terraform Destroy Plan Summary" >> "$GITHUB_OUTPUT"
+          else
+            echo "plan_file=tfplan" >> "$GITHUB_OUTPUT"
+            echo "plan_text_file=tfplan.txt" >> "$GITHUB_OUTPUT"
+            echo "plan_artifact_name=terraform-plan" >> "$GITHUB_OUTPUT"
+            echo "plan_title=Terraform Plan Summary" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Azure Login (OIDC)
@@ -150,22 +169,33 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
+        if: ${{ inputs.operation != 'destroy' }}
         run: |
           TFVARS_FILE="${{ inputs.tfvars_file }}"
           TFVARS_FLAG=""
           if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
             TFVARS_FLAG="-var-file=$TFVARS_FILE"
           fi
-          terraform plan -no-color -out tfplan $TFVARS_FLAG
+          terraform plan -no-color -out "${{ steps.plan_meta.outputs.plan_file }}" $TFVARS_FLAG
+
+      - name: Terraform Destroy Plan
+        if: ${{ inputs.operation == 'destroy' }}
+        run: |
+          TFVARS_FILE="${{ inputs.tfvars_file }}"
+          TFVARS_FLAG=""
+          if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
+            TFVARS_FLAG="-var-file=$TFVARS_FILE"
+          fi
+          terraform plan -destroy -no-color -out "${{ steps.plan_meta.outputs.plan_file }}" $TFVARS_FLAG
 
       - name: Terraform Plan Summary
         run: |
-          terraform show -no-color tfplan > tfplan.txt
+          terraform show -no-color "${{ steps.plan_meta.outputs.plan_file }}" > "${{ steps.plan_meta.outputs.plan_text_file }}"
           {
-            echo "## Terraform Plan Summary"
+            echo "## ${{ steps.plan_meta.outputs.plan_title }}"
             echo
             echo "\`\`\`hcl"
-            head -n 400 tfplan.txt
+            head -n 400 "${{ steps.plan_meta.outputs.plan_text_file }}"
             echo "\`\`\`"
             echo
             echo "_Plan output truncated to first 400 lines._"
@@ -174,16 +204,17 @@ jobs:
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: terraform-plan
+          name: ${{ steps.plan_meta.outputs.plan_artifact_name }}
           path: |
-            ${{ env.WORKING_DIR }}/tfplan
-            ${{ env.WORKING_DIR }}/tfplan.txt
+            ${{ env.WORKING_DIR }}/${{ steps.plan_meta.outputs.plan_file }}
+            ${{ env.WORKING_DIR }}/${{ steps.plan_meta.outputs.plan_text_file }}
             ${{ env.WORKING_DIR }}/ci.auto.tfvars
-          if-no-files-found: ignore
+          if-no-files-found: error
 
   terraform-apply:
     if: ${{ inputs.operation == 'apply' }}
     runs-on: ubuntu-latest
+    needs: terraform-plan
     environment: terraform-apply
     defaults:
       run:
@@ -212,37 +243,6 @@ jobs:
             fi
           done
 
-      - name: Build Optional Terraform Variables
-        env:
-          TF_VAR_POLICY_SCOPE_TYPE: ${{ vars.TF_VAR_POLICY_SCOPE_TYPE }}
-          TF_VAR_MANAGEMENT_GROUP_ID: ${{ vars.TF_VAR_MANAGEMENT_GROUP_ID }}
-          TF_VAR_GOVERNANCE_RG_NAME: ${{ vars.TF_VAR_GOVERNANCE_RG_NAME }}
-          TF_VAR_CREATE_GOVERNANCE_RG: ${{ vars.TF_VAR_CREATE_GOVERNANCE_RG }}
-          TF_VAR_DEPLOY_FREE_APP_SERVICE: ${{ vars.TF_VAR_DEPLOY_FREE_APP_SERVICE }}
-          TF_VAR_APP_SERVICE_NAME_PREFIX: ${{ vars.TF_VAR_APP_SERVICE_NAME_PREFIX }}
-        run: |
-          set -euo pipefail
-          rm -f ci.auto.tfvars
-
-          if [ -n "$TF_VAR_POLICY_SCOPE_TYPE" ]; then
-            echo "policy_scope_type = \"$TF_VAR_POLICY_SCOPE_TYPE\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_MANAGEMENT_GROUP_ID" ]; then
-            echo "management_group_id = \"$TF_VAR_MANAGEMENT_GROUP_ID\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_GOVERNANCE_RG_NAME" ]; then
-            echo "governance_resource_group_name = \"$TF_VAR_GOVERNANCE_RG_NAME\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_CREATE_GOVERNANCE_RG" ]; then
-            echo "create_governance_resource_group = $TF_VAR_CREATE_GOVERNANCE_RG" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_DEPLOY_FREE_APP_SERVICE" ]; then
-            echo "deploy_free_app_service = $TF_VAR_DEPLOY_FREE_APP_SERVICE" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_APP_SERVICE_NAME_PREFIX" ]; then
-            echo "app_service_name_prefix = \"$TF_VAR_APP_SERVICE_NAME_PREFIX\"" >> ci.auto.tfvars
-          fi
-
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -265,32 +265,19 @@ jobs:
             -backend-config="use_oidc=true" \
             -backend-config="use_azuread_auth=true"
 
-      - name: Terraform Plan (Apply Preview)
-        run: |
-          TFVARS_FILE="${{ inputs.tfvars_file }}"
-          TFVARS_FLAG=""
-          if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
-            TFVARS_FLAG="-var-file=$TFVARS_FILE"
-          fi
-          terraform plan -no-color -out apply.tfplan $TFVARS_FLAG
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.terraform-plan.outputs.plan_artifact_name }}
+          path: ${{ env.WORKING_DIR }}
 
-      - name: Terraform Apply Preview Summary
-        run: |
-          terraform show -no-color apply.tfplan > apply-plan.txt
-          {
-            echo "## Terraform Apply Plan Summary"
-            echo
-            echo "\`\`\`hcl"
-            head -n 300 apply-plan.txt
-            echo "\`\`\`"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Terraform Apply
-        run: terraform apply -no-color -auto-approve apply.tfplan
+      - name: Terraform Apply Saved Plan
+        run: terraform apply -no-color -auto-approve "${{ needs.terraform-plan.outputs.plan_file }}"
 
   terraform-destroy:
     if: ${{ inputs.operation == 'destroy' }}
     runs-on: ubuntu-latest
+    needs: terraform-plan
     environment: terraform-destroy
     defaults:
       run:
@@ -319,37 +306,6 @@ jobs:
             fi
           done
 
-      - name: Build Optional Terraform Variables
-        env:
-          TF_VAR_POLICY_SCOPE_TYPE: ${{ vars.TF_VAR_POLICY_SCOPE_TYPE }}
-          TF_VAR_MANAGEMENT_GROUP_ID: ${{ vars.TF_VAR_MANAGEMENT_GROUP_ID }}
-          TF_VAR_GOVERNANCE_RG_NAME: ${{ vars.TF_VAR_GOVERNANCE_RG_NAME }}
-          TF_VAR_CREATE_GOVERNANCE_RG: ${{ vars.TF_VAR_CREATE_GOVERNANCE_RG }}
-          TF_VAR_DEPLOY_FREE_APP_SERVICE: ${{ vars.TF_VAR_DEPLOY_FREE_APP_SERVICE }}
-          TF_VAR_APP_SERVICE_NAME_PREFIX: ${{ vars.TF_VAR_APP_SERVICE_NAME_PREFIX }}
-        run: |
-          set -euo pipefail
-          rm -f ci.auto.tfvars
-
-          if [ -n "$TF_VAR_POLICY_SCOPE_TYPE" ]; then
-            echo "policy_scope_type = \"$TF_VAR_POLICY_SCOPE_TYPE\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_MANAGEMENT_GROUP_ID" ]; then
-            echo "management_group_id = \"$TF_VAR_MANAGEMENT_GROUP_ID\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_GOVERNANCE_RG_NAME" ]; then
-            echo "governance_resource_group_name = \"$TF_VAR_GOVERNANCE_RG_NAME\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_CREATE_GOVERNANCE_RG" ]; then
-            echo "create_governance_resource_group = $TF_VAR_CREATE_GOVERNANCE_RG" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_DEPLOY_FREE_APP_SERVICE" ]; then
-            echo "deploy_free_app_service = $TF_VAR_DEPLOY_FREE_APP_SERVICE" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_APP_SERVICE_NAME_PREFIX" ]; then
-            echo "app_service_name_prefix = \"$TF_VAR_APP_SERVICE_NAME_PREFIX\"" >> ci.auto.tfvars
-          fi
-
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -372,25 +328,11 @@ jobs:
             -backend-config="use_oidc=true" \
             -backend-config="use_azuread_auth=true"
 
-      - name: Terraform Destroy Plan
-        run: |
-          TFVARS_FILE="${{ inputs.tfvars_file }}"
-          TFVARS_FLAG=""
-          if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
-            TFVARS_FLAG="-var-file=$TFVARS_FILE"
-          fi
-          terraform plan -destroy -no-color -out destroy.tfplan $TFVARS_FLAG
+      - name: Download Destroy Plan Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.terraform-plan.outputs.plan_artifact_name }}
+          path: ${{ env.WORKING_DIR }}
 
-      - name: Terraform Destroy Summary
-        run: |
-          terraform show -no-color destroy.tfplan > destroy-plan.txt
-          {
-            echo "## Terraform Destroy Plan Summary"
-            echo
-            echo "\`\`\`hcl"
-            head -n 300 destroy-plan.txt
-            echo "\`\`\`"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Terraform Destroy Apply
-        run: terraform apply -no-color -auto-approve destroy.tfplan
+      - name: Terraform Apply Destroy Plan
+        run: terraform apply -no-color -auto-approve "${{ needs.terraform-plan.outputs.plan_file }}"

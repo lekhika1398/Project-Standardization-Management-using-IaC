@@ -7,6 +7,10 @@
    - `AZURE_TENANT_ID`
    - `AZURE_SUBSCRIPTION_ID`
    - Do not add separate `ARM_*` values.
+   - Ensure Entra federated credentials include these subjects:
+     - `repo:<ORG>/<REPO>:ref:refs/heads/main`
+     - `repo:<ORG>/<REPO>:environment:terraform-apply`
+     - `repo:<ORG>/<REPO>:environment:terraform-destroy`
 2. Run workflow `.github/workflows/backend-setup.yml`.
 3. Copy backend output values from workflow summary into repository values:
    - `TFSTATE_RESOURCE_GROUP`
@@ -24,8 +28,8 @@
 Run workflow `.github/workflows/terraform-governance.yml` and choose `operation`:
 
 - `plan`: validates and shows planned changes
-- `apply`: plans and applies changes (requires `terraform-apply` environment approval)
-- `destroy`: plans destroy and applies destroy (requires `terraform-destroy` environment approval)
+- `apply`: runs plan first, then applies saved plan after `terraform-apply` environment approval
+- `destroy`: runs destroy plan first, then applies saved destroy plan after `terraform-destroy` environment approval
 
 Default `tfvars_file` is `dev.tfvars`, which creates a new governance resource group and assigns policies to that resource group.
 

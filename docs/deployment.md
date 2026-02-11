@@ -25,6 +25,14 @@ SP_OBJECT_ID="$(az ad sp create --id "$APP_ID" --query id -o tsv)"
 az ad app federated-credential create \
   --id "$APP_ID" \
   --parameters "{\"name\":\"github-main\",\"issuer\":\"https://token.actions.githubusercontent.com\",\"subject\":\"repo:${GITHUB_ORG}/${GITHUB_REPO}:ref:refs/heads/main\",\"audiences\":[\"api://AzureADTokenExchange\"]}"
+
+az ad app federated-credential create \
+  --id "$APP_ID" \
+  --parameters "{\"name\":\"github-terraform-apply-env\",\"issuer\":\"https://token.actions.githubusercontent.com\",\"subject\":\"repo:${GITHUB_ORG}/${GITHUB_REPO}:environment:terraform-apply\",\"audiences\":[\"api://AzureADTokenExchange\"]}"
+
+az ad app federated-credential create \
+  --id "$APP_ID" \
+  --parameters "{\"name\":\"github-terraform-destroy-env\",\"issuer\":\"https://token.actions.githubusercontent.com\",\"subject\":\"repo:${GITHUB_ORG}/${GITHUB_REPO}:environment:terraform-destroy\",\"audiences\":[\"api://AzureADTokenExchange\"]}"
 ```
 
 ## 3. Configure Core GitHub Values
@@ -152,6 +160,12 @@ Run workflow `.github/workflows/terraform-governance.yml` with operation:
 - `apply`
 - `destroy`
 
+Execution behavior:
+
+- `plan`: runs validation and creates plan artifact.
+- `apply`: always runs plan first, then waits for `terraform-apply` environment approval, then applies saved plan artifact.
+- `destroy`: always runs destroy plan first, then waits for `terraform-destroy` environment approval, then applies saved destroy plan artifact.
+
 Optional per-run overrides in workflow inputs:
 
 - `org_prefix`
@@ -179,3 +193,4 @@ az policy assignment list \
 Common login issue:
 
 - `client-id` / `tenant-id` missing: ensure `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID` are set as repo variables or secrets.
+- `AADSTS700213` with subject `environment:terraform-apply` or `environment:terraform-destroy`: add matching federated credentials for those GitHub environments (commands above).

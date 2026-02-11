@@ -104,8 +104,8 @@ Optional default variables:
 5. Configure `TF_VAR_*` defaults (or pass at runtime when triggering workflow).
 6. Run `Terraform Governance` workflow and choose operation:
    - `plan`
-   - `apply` (approval required in `terraform-apply` environment)
-   - `destroy` (approval required in `terraform-destroy` environment)
+   - `apply` (workflow runs plan first, then approval required in `terraform-apply` environment)
+   - `destroy` (workflow runs destroy plan first, then approval required in `terraform-destroy` environment)
 7. Keep `tfvars_file` input as `dev.tfvars` for dev runs, or change it for other profiles.
 
 ## Scope Guidance
