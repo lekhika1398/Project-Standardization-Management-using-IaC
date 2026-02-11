@@ -1,8 +1,6 @@
 name: Terraform Governance
 
 on:
-  pull_request:
-  push:
   workflow_dispatch:
 
 permissions:
