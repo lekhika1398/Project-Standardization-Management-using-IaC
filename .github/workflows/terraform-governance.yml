@@ -3,10 +3,15 @@ name: Terraform Governance
 on:
   workflow_dispatch:
     inputs:
-      run_destroy:
-        description: "Set true to run terraform destroy after approval"
+      operation:
+        description: "Terraform operation to execute"
+        type: choice
         required: true
-        default: "false"
+        default: plan
+        options:
+          - plan
+          - apply
+          - destroy
       destroy_confirmation:
         description: "Type DESTROY to confirm destroy operation"
         required: false
@@ -31,6 +36,7 @@ env:
 
 jobs:
   terraform-plan:
+    if: ${{ inputs.operation == 'plan' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -145,7 +151,7 @@ jobs:
             head -n 400 tfplan.txt
             echo "\`\`\`"
             echo
-            echo "_Plan output truncated to first 400 lines in summary. Full plan artifact attached._"
+            echo "_Plan output truncated to first 400 lines._"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Plan Artifact
@@ -159,9 +165,8 @@ jobs:
           if-no-files-found: ignore
 
   terraform-apply:
+    if: ${{ inputs.operation == 'apply' }}
     runs-on: ubuntu-latest
-    needs: terraform-plan
-    if: ${{ !(inputs.run_destroy == 'true') }}
     environment: terraform-apply
     defaults:
       run:
@@ -171,18 +176,71 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate Azure Login Inputs
+      - name: Validate Required Repository Variables
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
+          TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP }}
+          TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
+          TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER }}
+          TFSTATE_KEY: ${{ vars.TFSTATE_KEY }}
+          TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
+          TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
+          TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
+          TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
         run: |
           set -euo pipefail
-          [ -n "${ARM_CLIENT_ID}" ] || { echo "Missing AZURE_CLIENT_ID (set as repository variable or secret)"; exit 1; }
-          [ -n "${ARM_TENANT_ID}" ] || { echo "Missing AZURE_TENANT_ID (set as repository variable or secret)"; exit 1; }
-          [ -n "${ARM_SUBSCRIPTION_ID}" ] || { echo "Missing AZURE_SUBSCRIPTION_ID (set as repository variable or secret)"; exit 1; }
+          required=(
+            AZURE_CLIENT_ID
+            AZURE_TENANT_ID
+            AZURE_SUBSCRIPTION_ID
+            TFSTATE_RESOURCE_GROUP
+            TFSTATE_STORAGE_ACCOUNT
+            TFSTATE_CONTAINER
+            TFSTATE_KEY
+            TF_VAR_ORG_PREFIX
+            TF_VAR_ENVIRONMENT
+            TF_VAR_REGION_CODE
+            TF_VAR_LOCATION
+          )
+          for key in "${required[@]}"; do
+            if [ -z "${!key}" ]; then
+              echo "Missing required repository variable: $key"
+              exit 1
+            fi
+          done
 
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform-plan
-          path: ${{ env.WORKING_DIR }}
+      - name: Build Optional Terraform Variables
+        env:
+          TF_VAR_POLICY_SCOPE_TYPE: ${{ vars.TF_VAR_POLICY_SCOPE_TYPE }}
+          TF_VAR_MANAGEMENT_GROUP_ID: ${{ vars.TF_VAR_MANAGEMENT_GROUP_ID }}
+          TF_VAR_GOVERNANCE_RG_NAME: ${{ vars.TF_VAR_GOVERNANCE_RG_NAME }}
+          TF_VAR_CREATE_GOVERNANCE_RG: ${{ vars.TF_VAR_CREATE_GOVERNANCE_RG }}
+          TF_VAR_DEPLOY_FREE_APP_SERVICE: ${{ vars.TF_VAR_DEPLOY_FREE_APP_SERVICE }}
+          TF_VAR_APP_SERVICE_NAME_PREFIX: ${{ vars.TF_VAR_APP_SERVICE_NAME_PREFIX }}
+        run: |
+          set -euo pipefail
+          rm -f ci.auto.tfvars
+
+          if [ -n "$TF_VAR_POLICY_SCOPE_TYPE" ]; then
+            echo "policy_scope_type = \"$TF_VAR_POLICY_SCOPE_TYPE\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_MANAGEMENT_GROUP_ID" ]; then
+            echo "management_group_id = \"$TF_VAR_MANAGEMENT_GROUP_ID\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_GOVERNANCE_RG_NAME" ]; then
+            echo "governance_resource_group_name = \"$TF_VAR_GOVERNANCE_RG_NAME\"" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_CREATE_GOVERNANCE_RG" ]; then
+            echo "create_governance_resource_group = $TF_VAR_CREATE_GOVERNANCE_RG" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_DEPLOY_FREE_APP_SERVICE" ]; then
+            echo "deploy_free_app_service = $TF_VAR_DEPLOY_FREE_APP_SERVICE" >> ci.auto.tfvars
+          fi
+          if [ -n "$TF_VAR_APP_SERVICE_NAME_PREFIX" ]; then
+            echo "app_service_name_prefix = \"$TF_VAR_APP_SERVICE_NAME_PREFIX\"" >> ci.auto.tfvars
+          fi
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -204,12 +262,26 @@ jobs:
             -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
             -backend-config="key=${{ vars.TFSTATE_KEY }}"
 
+      - name: Terraform Plan (Apply Preview)
+        run: terraform plan -no-color -out apply.tfplan
+
+      - name: Terraform Apply Preview Summary
+        run: |
+          terraform show -no-color apply.tfplan > apply-plan.txt
+          {
+            echo "## Terraform Apply Plan Summary"
+            echo
+            echo "\`\`\`hcl"
+            head -n 300 apply-plan.txt
+            echo "\`\`\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Terraform Apply
-        run: terraform apply -no-color -auto-approve tfplan
+        run: terraform apply -no-color -auto-approve apply.tfplan
 
   terraform-destroy:
+    if: ${{ inputs.operation == 'destroy' && inputs.destroy_confirmation == 'DESTROY' }}
     runs-on: ubuntu-latest
-    if: ${{ inputs.run_destroy == 'true' && inputs.destroy_confirmation == 'DESTROY' }}
     environment: terraform-destroy
     defaults:
       run:
