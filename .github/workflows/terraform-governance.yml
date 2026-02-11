@@ -75,10 +75,6 @@ jobs:
           TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
           TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
           TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
-          TF_VAR_ORG_PREFIX: ${{ env.TF_VAR_org_prefix }}
-          TF_VAR_ENVIRONMENT: ${{ env.TF_VAR_environment }}
-          TF_VAR_REGION_CODE: ${{ env.TF_VAR_region_code }}
-          TF_VAR_LOCATION: ${{ env.TF_VAR_location }}
         run: |
           set -euo pipefail
           required=(
@@ -89,10 +85,6 @@ jobs:
             TFSTATE_STORAGE_ACCOUNT
             TFSTATE_CONTAINER
             TFSTATE_KEY
-            TF_VAR_ORG_PREFIX
-            TF_VAR_ENVIRONMENT
-            TF_VAR_REGION_CODE
-            TF_VAR_LOCATION
           )
           for key in "${required[@]}"; do
             if [ -z "${!key}" ]; then
@@ -211,10 +203,6 @@ jobs:
           TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
           TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
           TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
-          TF_VAR_ORG_PREFIX: ${{ env.TF_VAR_org_prefix }}
-          TF_VAR_ENVIRONMENT: ${{ env.TF_VAR_environment }}
-          TF_VAR_REGION_CODE: ${{ env.TF_VAR_region_code }}
-          TF_VAR_LOCATION: ${{ env.TF_VAR_location }}
         run: |
           set -euo pipefail
           required=(
@@ -225,10 +213,6 @@ jobs:
             TFSTATE_STORAGE_ACCOUNT
             TFSTATE_CONTAINER
             TFSTATE_KEY
-            TF_VAR_ORG_PREFIX
-            TF_VAR_ENVIRONMENT
-            TF_VAR_REGION_CODE
-            TF_VAR_LOCATION
           )
           for key in "${required[@]}"; do
             if [ -z "${!key}" ]; then
@@ -332,10 +316,6 @@ jobs:
           TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
           TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
           TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
-          TF_VAR_ORG_PREFIX: ${{ env.TF_VAR_org_prefix }}
-          TF_VAR_ENVIRONMENT: ${{ env.TF_VAR_environment }}
-          TF_VAR_REGION_CODE: ${{ env.TF_VAR_region_code }}
-          TF_VAR_LOCATION: ${{ env.TF_VAR_location }}
         run: |
           set -euo pipefail
           required=(
@@ -346,10 +326,6 @@ jobs:
             TFSTATE_STORAGE_ACCOUNT
             TFSTATE_CONTAINER
             TFSTATE_KEY
-            TF_VAR_ORG_PREFIX
-            TF_VAR_ENVIRONMENT
-            TF_VAR_REGION_CODE
-            TF_VAR_LOCATION
           )
           for key in "${required[@]}"; do
             if [ -z "${!key}" ]; then
