@@ -12,6 +12,22 @@ on:
           - plan
           - apply
           - destroy
+      org_prefix:
+        description: "Override org_prefix for this run (optional)"
+        required: false
+        default: ""
+      environment:
+        description: "Override environment for this run (optional)"
+        required: false
+        default: ""
+      region_code:
+        description: "Override region_code for this run (optional)"
+        required: false
+        default: ""
+      location:
+        description: "Override location for this run (optional)"
+        required: false
+        default: ""
 
 permissions:
   id-token: write
@@ -29,10 +45,10 @@ env:
   TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER != '' && vars.TFSTATE_CONTAINER || secrets.TFSTATE_CONTAINER }}
   TFSTATE_KEY: ${{ vars.TFSTATE_KEY != '' && vars.TFSTATE_KEY || secrets.TFSTATE_KEY }}
   TF_VAR_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-  TF_VAR_org_prefix: ${{ vars.TF_VAR_ORG_PREFIX }}
-  TF_VAR_environment: ${{ vars.TF_VAR_ENVIRONMENT }}
-  TF_VAR_region_code: ${{ vars.TF_VAR_REGION_CODE }}
-  TF_VAR_location: ${{ vars.TF_VAR_LOCATION }}
+  TF_VAR_org_prefix: ${{ inputs.org_prefix != '' && inputs.org_prefix || vars.TF_VAR_ORG_PREFIX }}
+  TF_VAR_environment: ${{ inputs.environment != '' && inputs.environment || vars.TF_VAR_ENVIRONMENT }}
+  TF_VAR_region_code: ${{ inputs.region_code != '' && inputs.region_code || vars.TF_VAR_REGION_CODE }}
+  TF_VAR_location: ${{ inputs.location != '' && inputs.location || vars.TF_VAR_LOCATION }}
 
 jobs:
   terraform-plan:
@@ -55,10 +71,10 @@ jobs:
           TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
           TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
           TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
-          TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
-          TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
-          TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
-          TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
+          TF_VAR_ORG_PREFIX: ${{ env.TF_VAR_org_prefix }}
+          TF_VAR_ENVIRONMENT: ${{ env.TF_VAR_environment }}
+          TF_VAR_REGION_CODE: ${{ env.TF_VAR_region_code }}
+          TF_VAR_LOCATION: ${{ env.TF_VAR_location }}
         run: |
           set -euo pipefail
           required=(
@@ -185,10 +201,10 @@ jobs:
           TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
           TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
           TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
-          TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
-          TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
-          TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
-          TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
+          TF_VAR_ORG_PREFIX: ${{ env.TF_VAR_org_prefix }}
+          TF_VAR_ENVIRONMENT: ${{ env.TF_VAR_environment }}
+          TF_VAR_REGION_CODE: ${{ env.TF_VAR_region_code }}
+          TF_VAR_LOCATION: ${{ env.TF_VAR_location }}
         run: |
           set -euo pipefail
           required=(
@@ -300,10 +316,10 @@ jobs:
           TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
           TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
           TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
-          TF_VAR_ORG_PREFIX: ${{ vars.TF_VAR_ORG_PREFIX }}
-          TF_VAR_ENVIRONMENT: ${{ vars.TF_VAR_ENVIRONMENT }}
-          TF_VAR_REGION_CODE: ${{ vars.TF_VAR_REGION_CODE }}
-          TF_VAR_LOCATION: ${{ vars.TF_VAR_LOCATION }}
+          TF_VAR_ORG_PREFIX: ${{ env.TF_VAR_org_prefix }}
+          TF_VAR_ENVIRONMENT: ${{ env.TF_VAR_environment }}
+          TF_VAR_REGION_CODE: ${{ env.TF_VAR_region_code }}
+          TF_VAR_LOCATION: ${{ env.TF_VAR_location }}
         run: |
           set -euo pipefail
           required=(
