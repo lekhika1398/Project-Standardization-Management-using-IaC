@@ -36,19 +36,19 @@ locals {
       length(try(properties.parameters, {})) == 0
       ? null
       : jsonencode({
-          for parameter_name, parameter_definition in try(properties.parameters, {}) :
-          parameter_name => {
-            value = (
-              contains(keys(lookup(local.effective_policy_assignment_parameters, policy_key, {})), parameter_name)
-              ? lookup(local.effective_policy_assignment_parameters[policy_key], parameter_name, null)
-              : try(parameter_definition.defaultValue, null)
-            )
-          }
-          if (
-            contains(keys(lookup(local.effective_policy_assignment_parameters, policy_key, {})), parameter_name) ||
-            can(parameter_definition.defaultValue)
+        for parameter_name, parameter_definition in try(properties.parameters, {}) :
+        parameter_name => {
+          value = (
+            contains(keys(lookup(local.effective_policy_assignment_parameters, policy_key, {})), parameter_name)
+            ? lookup(local.effective_policy_assignment_parameters[policy_key], parameter_name, null)
+            : try(parameter_definition.defaultValue, null)
           )
-        })
+        }
+        if (
+          contains(keys(lookup(local.effective_policy_assignment_parameters, policy_key, {})), parameter_name) ||
+          can(parameter_definition.defaultValue)
+        )
+      })
     )
   }
 

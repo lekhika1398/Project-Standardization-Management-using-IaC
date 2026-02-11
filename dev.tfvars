@@ -1,18 +1,18 @@
-subscription_id                   = ""
-org_prefix                        = "lekhika"
-environment                       = "dev"
-region_code                       = "eus2"
-location                          = "eastus2"
+subscription_id = ""
+org_prefix      = "lekhika"
+environment     = "dev"
+region_code     = "eus2"
+location        = "eastus2"
 
-policy_scope_type                 = "resource_group"
-management_group_id               = ""
-policy_assignment_location        = "eastus"
+policy_scope_type          = "resource_group"
+management_group_id        = ""
+policy_assignment_location = "eastus"
 
-create_governance_resource_group  = true
-governance_resource_group_name    = "lekhika-dev-rg-eus2"
+create_governance_resource_group = true
+governance_resource_group_name   = "lekhika-dev-rg-eus2"
 
-deploy_free_app_service           = true
-app_service_name_prefix           = "lekhika-dev-webapp"
+deploy_free_app_service = true
+app_service_name_prefix = "lekhika-dev-webapp"
 
 mandatory_tags = [
   "Environment",
