@@ -143,9 +143,5 @@ jobs:
             echo "- AZURE_TENANT_ID"
             echo "- AZURE_SUBSCRIPTION_ID"
             echo
-            echo "Terraform required variables:"
-            echo
-            echo "- TF_VAR_ORG_PREFIX"
-            echo "- TF_VAR_ENVIRONMENT"
-            echo "- TF_VAR_REGION_CODE"
+            echo "Terraform governance values are sourced from your tfvars file (for example `dev.tfvars`)."
           } >> "$GITHUB_STEP_SUMMARY"

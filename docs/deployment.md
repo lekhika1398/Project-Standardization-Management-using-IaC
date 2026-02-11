@@ -121,27 +121,21 @@ az role assignment create \
   --scope "/providers/Microsoft.Management/managementGroups/$MG_ID"
 ```
 
-## 7. Configure Terraform Defaults
+## 7. Configure Terraform Values
 
-Set repository variables:
+Set deployment values in your tfvars file (for example `dev.tfvars`), including:
 
-- `TF_VAR_ORG_PREFIX`
-- `TF_VAR_ENVIRONMENT`
-- `TF_VAR_REGION_CODE`
-
-Set deployment location in the selected tfvars file (for example `dev.tfvars`):
-
-- `location = "eastus2"` (or your preferred Azure region)
-
-Optional:
-
-- `TF_VAR_POLICY_SCOPE_TYPE`
-- `TF_VAR_MANAGEMENT_GROUP_ID`
-- `TF_VAR_GOVERNANCE_RG_NAME`
-- `TF_VAR_CREATE_GOVERNANCE_RG`
-- `TF_VAR_DEPLOY_FREE_APP_SERVICE` (legacy name; controls App Service deployment on/off)
-- `TF_VAR_APP_SERVICE_PLAN_SKU_NAME`
-- `TF_VAR_APP_SERVICE_NAME_PREFIX`
+- `org_prefix`
+- `environment`
+- `region_code`
+- `location`
+- `policy_scope_type`
+- `management_group_id` (when needed)
+- `governance_resource_group_name`
+- `create_governance_resource_group`
+- `deploy_free_app_service`
+- `app_service_plan_sku_name`
+- `app_service_name_prefix`
 
 ## 8. Configure Approval Gates
 
@@ -167,12 +161,9 @@ Execution behavior:
 
 Optional per-run overrides in workflow inputs:
 
-- `org_prefix`
-- `environment`
-- `region_code`
 - `tfvars_file` (default `dev.tfvars`)
 
-`location` is sourced from the selected tfvars file.
+All governance variables are sourced from the selected tfvars file.
 
 `dev.tfvars` profile behavior:
 

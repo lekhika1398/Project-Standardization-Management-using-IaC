@@ -79,23 +79,7 @@ Set these as **Repository Variables or Secrets**:
 
 Note: You do not need to create any `ARM_*` repository values. Workflows use only `AZURE_*` and `TFSTATE_*` inputs.
 
-Set these as **Repository Variables** (defaults for runtime):
-
-- `TF_VAR_ORG_PREFIX`
-- `TF_VAR_ENVIRONMENT`
-- `TF_VAR_REGION_CODE`
-
-Location is managed in the selected `tfvars` file (for example `dev.tfvars`), not as a workflow runtime input.
-
-Optional default variables:
-
-- `TF_VAR_POLICY_SCOPE_TYPE`
-- `TF_VAR_MANAGEMENT_GROUP_ID`
-- `TF_VAR_GOVERNANCE_RG_NAME`
-- `TF_VAR_CREATE_GOVERNANCE_RG`
-- `TF_VAR_DEPLOY_FREE_APP_SERVICE` (legacy name; controls App Service deployment on/off)
-- `TF_VAR_APP_SERVICE_PLAN_SKU_NAME`
-- `TF_VAR_APP_SERVICE_NAME_PREFIX`
+Terraform deployment values are sourced from the selected tfvars file (for example `dev.tfvars`).
 
 ## Quick Start
 
@@ -103,7 +87,7 @@ Optional default variables:
 2. Run `Backend Setup` workflow and copy backend outputs.
 3. Save backend outputs as `TFSTATE_*` repository values.
 4. Use `dev.tfvars` for default dev deployment profile (creates RG and assigns policies at that RG scope).
-5. Configure `TF_VAR_*` defaults (or pass at runtime when triggering workflow).
+5. Configure deployment values in `dev.tfvars` (or another tfvars profile).
 6. Run `Terraform Governance` workflow and choose operation:
    - `plan`
    - `apply` (workflow runs plan first, then approval required in `terraform-ops` environment)

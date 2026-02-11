@@ -16,11 +16,10 @@
    - `TFSTATE_STORAGE_ACCOUNT`
    - `TFSTATE_CONTAINER`
    - `TFSTATE_KEY`
-4. Set default Terraform values as repository variables:
-   - `TF_VAR_ORG_PREFIX`
-   - `TF_VAR_ENVIRONMENT`
-   - `TF_VAR_REGION_CODE`
-5. Set deployment location in your selected tfvars file (for example `dev.tfvars`):
+4. Set deployment values in your selected tfvars file (for example `dev.tfvars`):
+   - `org_prefix = "lekhika"`
+   - `environment = "dev"`
+   - `region_code = "eus2"`
    - `location = "eastus2"` (or your preferred region)
 
 ## 2. Run Operations Manually
@@ -37,13 +36,9 @@ Default `tfvars_file` is `dev.tfvars`, which creates a new governance resource g
 
 You can override defaults at run time in workflow dispatch inputs:
 
-- `org_prefix`
-- `environment`
-- `region_code`
 - `tfvars_file` (for example: `dev.tfvars`)
 
-If an input is blank, workflow uses corresponding repository variable.
-`location` is not a workflow input; it is read from the selected tfvars file.
+All governance variables are read from the selected tfvars file.
 
 ## 4. Configure Policy Scope
 
@@ -57,13 +52,13 @@ If using `management_group`, also set `TF_VAR_MANAGEMENT_GROUP_ID`.
 
 ## 5. Configure Governance Resource Group
 
-Optional default variables:
+Configure these in your tfvars file:
 
-- `TF_VAR_GOVERNANCE_RG_NAME`
-- `TF_VAR_CREATE_GOVERNANCE_RG`
-- `TF_VAR_DEPLOY_FREE_APP_SERVICE` (legacy name; controls App Service deployment on/off)
-- `TF_VAR_APP_SERVICE_PLAN_SKU_NAME` (for example: `B1`, `S1`, `F1`)
-- `TF_VAR_APP_SERVICE_NAME_PREFIX`
+- `governance_resource_group_name`
+- `create_governance_resource_group`
+- `deploy_free_app_service`
+- `app_service_plan_sku_name` (for example: `B1`, `S1`, `F1`)
+- `app_service_name_prefix`
 
 ## 6. Add Policies (Unlimited)
 

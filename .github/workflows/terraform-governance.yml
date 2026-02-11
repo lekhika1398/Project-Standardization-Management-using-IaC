@@ -12,18 +12,6 @@ on:
           - plan
           - apply
           - destroy
-      org_prefix:
-        description: "org_prefix value for this run"
-        required: false
-        default: "lekhika"
-      environment:
-        description: "environment value for this run"
-        required: false
-        default: "dev"
-      region_code:
-        description: "region_code value for this run"
-        required: false
-        default: "eus2"
       tfvars_file:
         description: "Optional tfvars file path in repo (example: dev.tfvars)"
         required: false
@@ -49,10 +37,6 @@ env:
   TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT != '' && vars.TFSTATE_STORAGE_ACCOUNT || secrets.TFSTATE_STORAGE_ACCOUNT }}
   TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER != '' && vars.TFSTATE_CONTAINER || secrets.TFSTATE_CONTAINER }}
   TFSTATE_KEY: ${{ vars.TFSTATE_KEY != '' && vars.TFSTATE_KEY || secrets.TFSTATE_KEY }}
-  TF_VAR_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-  TF_VAR_org_prefix: ${{ inputs.org_prefix != '' && inputs.org_prefix || vars.TF_VAR_ORG_PREFIX != '' && vars.TF_VAR_ORG_PREFIX || 'lekhika' }}
-  TF_VAR_environment: ${{ inputs.environment != '' && inputs.environment || vars.TF_VAR_ENVIRONMENT != '' && vars.TF_VAR_ENVIRONMENT || 'dev' }}
-  TF_VAR_region_code: ${{ inputs.region_code != '' && inputs.region_code || vars.TF_VAR_REGION_CODE != '' && vars.TF_VAR_REGION_CODE || 'eus2' }}
 
 jobs:
   terraform-plan:
@@ -88,41 +72,6 @@ jobs:
               exit 1
             fi
           done
-
-      - name: Build Optional Terraform Variables
-        env:
-          TF_VAR_POLICY_SCOPE_TYPE: ${{ vars.TF_VAR_POLICY_SCOPE_TYPE }}
-          TF_VAR_MANAGEMENT_GROUP_ID: ${{ vars.TF_VAR_MANAGEMENT_GROUP_ID }}
-          TF_VAR_GOVERNANCE_RG_NAME: ${{ vars.TF_VAR_GOVERNANCE_RG_NAME }}
-          TF_VAR_CREATE_GOVERNANCE_RG: ${{ vars.TF_VAR_CREATE_GOVERNANCE_RG }}
-          TF_VAR_DEPLOY_FREE_APP_SERVICE: ${{ vars.TF_VAR_DEPLOY_FREE_APP_SERVICE }}
-          TF_VAR_APP_SERVICE_PLAN_SKU_NAME: ${{ vars.TF_VAR_APP_SERVICE_PLAN_SKU_NAME }}
-          TF_VAR_APP_SERVICE_NAME_PREFIX: ${{ vars.TF_VAR_APP_SERVICE_NAME_PREFIX }}
-        run: |
-          set -euo pipefail
-          rm -f ci.auto.tfvars
-
-          if [ -n "$TF_VAR_POLICY_SCOPE_TYPE" ]; then
-            echo "policy_scope_type = \"$TF_VAR_POLICY_SCOPE_TYPE\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_MANAGEMENT_GROUP_ID" ]; then
-            echo "management_group_id = \"$TF_VAR_MANAGEMENT_GROUP_ID\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_GOVERNANCE_RG_NAME" ]; then
-            echo "governance_resource_group_name = \"$TF_VAR_GOVERNANCE_RG_NAME\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_CREATE_GOVERNANCE_RG" ]; then
-            echo "create_governance_resource_group = $TF_VAR_CREATE_GOVERNANCE_RG" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_DEPLOY_FREE_APP_SERVICE" ]; then
-            echo "deploy_free_app_service = $TF_VAR_DEPLOY_FREE_APP_SERVICE" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_APP_SERVICE_PLAN_SKU_NAME" ]; then
-            echo "app_service_plan_sku_name = \"$TF_VAR_APP_SERVICE_PLAN_SKU_NAME\"" >> ci.auto.tfvars
-          fi
-          if [ -n "$TF_VAR_APP_SERVICE_NAME_PREFIX" ]; then
-            echo "app_service_name_prefix = \"$TF_VAR_APP_SERVICE_NAME_PREFIX\"" >> ci.auto.tfvars
-          fi
 
       - name: Resolve Plan Metadata
         id: plan_meta
@@ -175,11 +124,7 @@ jobs:
           if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
             TFVARS_FLAG="-var-file=$TFVARS_FILE"
           fi
-          terraform plan -no-color -out "${{ steps.plan_meta.outputs.plan_file }}" $TFVARS_FLAG \
-            -var="subscription_id=${TF_VAR_subscription_id}" \
-            -var="org_prefix=${TF_VAR_org_prefix}" \
-            -var="environment=${TF_VAR_environment}" \
-            -var="region_code=${TF_VAR_region_code}"
+          terraform plan -no-color -out "${{ steps.plan_meta.outputs.plan_file }}" $TFVARS_FLAG
 
       - name: Terraform Destroy Plan
         if: ${{ inputs.operation == 'destroy' }}
@@ -189,11 +134,7 @@ jobs:
           if [ -n "$TFVARS_FILE" ] && [ -f "$TFVARS_FILE" ]; then
             TFVARS_FLAG="-var-file=$TFVARS_FILE"
           fi
-          terraform plan -destroy -no-color -out "${{ steps.plan_meta.outputs.plan_file }}" $TFVARS_FLAG \
-            -var="subscription_id=${TF_VAR_subscription_id}" \
-            -var="org_prefix=${TF_VAR_org_prefix}" \
-            -var="environment=${TF_VAR_environment}" \
-            -var="region_code=${TF_VAR_region_code}"
+          terraform plan -destroy -no-color -out "${{ steps.plan_meta.outputs.plan_file }}" $TFVARS_FLAG
 
       - name: Terraform Plan Summary
         run: |
@@ -215,7 +156,6 @@ jobs:
           path: |
             ${{ env.WORKING_DIR }}/${{ steps.plan_meta.outputs.plan_file }}
             ${{ env.WORKING_DIR }}/${{ steps.plan_meta.outputs.plan_text_file }}
-            ${{ env.WORKING_DIR }}/ci.auto.tfvars
           if-no-files-found: error
 
   terraform-apply:
