@@ -41,9 +41,9 @@ env:
   TF_IN_AUTOMATION: true
   TF_INPUT: false
   WORKING_DIR: .
-  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
-  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
+  AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
   TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP != '' && vars.TFSTATE_RESOURCE_GROUP || secrets.TFSTATE_RESOURCE_GROUP }}
   TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT != '' && vars.TFSTATE_STORAGE_ACCOUNT || secrets.TFSTATE_STORAGE_ACCOUNT }}
   TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER != '' && vars.TFSTATE_CONTAINER || secrets.TFSTATE_CONTAINER }}
@@ -67,14 +67,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Required Repository Variables
-        env:
-          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
-          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-          TFSTATE_RESOURCE_GROUP: ${{ env.TFSTATE_RESOURCE_GROUP }}
-          TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
-          TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
-          TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
         run: |
           set -euo pipefail
           required=(
@@ -127,9 +119,9 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ env.ARM_CLIENT_ID }}
-          tenant-id: ${{ env.ARM_TENANT_ID }}
-          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -138,6 +130,11 @@ jobs:
 
       - name: Terraform Init
         run: |
+          export ARM_USE_OIDC=true
+          export ARM_USE_AZUREAD=true
+          export ARM_CLIENT_ID="${AZURE_CLIENT_ID}"
+          export ARM_TENANT_ID="${AZURE_TENANT_ID}"
+          export ARM_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"
           terraform init \
             -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
             -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
@@ -195,14 +192,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Required Repository Variables
-        env:
-          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
-          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-          TFSTATE_RESOURCE_GROUP: ${{ env.TFSTATE_RESOURCE_GROUP }}
-          TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
-          TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
-          TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
         run: |
           set -euo pipefail
           required=(
@@ -255,9 +244,9 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ env.ARM_CLIENT_ID }}
-          tenant-id: ${{ env.ARM_TENANT_ID }}
-          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -266,6 +255,11 @@ jobs:
 
       - name: Terraform Init
         run: |
+          export ARM_USE_OIDC=true
+          export ARM_USE_AZUREAD=true
+          export ARM_CLIENT_ID="${AZURE_CLIENT_ID}"
+          export ARM_TENANT_ID="${AZURE_TENANT_ID}"
+          export ARM_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"
           terraform init \
             -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
             -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
@@ -308,14 +302,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Required Repository Variables
-        env:
-          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID != '' && vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID != '' && vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
-          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID != '' && vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
-          TFSTATE_RESOURCE_GROUP: ${{ env.TFSTATE_RESOURCE_GROUP }}
-          TFSTATE_STORAGE_ACCOUNT: ${{ env.TFSTATE_STORAGE_ACCOUNT }}
-          TFSTATE_CONTAINER: ${{ env.TFSTATE_CONTAINER }}
-          TFSTATE_KEY: ${{ env.TFSTATE_KEY }}
         run: |
           set -euo pipefail
           required=(
@@ -368,9 +354,9 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ env.ARM_CLIENT_ID }}
-          tenant-id: ${{ env.ARM_TENANT_ID }}
-          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -379,6 +365,11 @@ jobs:
 
       - name: Terraform Init
         run: |
+          export ARM_USE_OIDC=true
+          export ARM_USE_AZUREAD=true
+          export ARM_CLIENT_ID="${AZURE_CLIENT_ID}"
+          export ARM_TENANT_ID="${AZURE_TENANT_ID}"
+          export ARM_SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID}"
           terraform init \
             -backend-config="resource_group_name=${{ env.TFSTATE_RESOURCE_GROUP }}" \
             -backend-config="storage_account_name=${{ env.TFSTATE_STORAGE_ACCOUNT }}" \
