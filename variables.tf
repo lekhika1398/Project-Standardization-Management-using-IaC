@@ -39,11 +39,6 @@ variable "management_group_id" {
   description = "Management group ID (required when policy_scope_type is management_group)."
   type        = string
   default     = ""
-
-  validation {
-    condition     = var.policy_scope_type != "management_group" || trimspace(var.management_group_id) != ""
-    error_message = "management_group_id must be set when policy_scope_type is management_group."
-  }
 }
 
 variable "policy_assignment_location" {
