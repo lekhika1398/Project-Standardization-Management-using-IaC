@@ -1,0 +1,31 @@
+subscription_id              = ""
+org_prefix                   = "contoso"
+environment                  = "prod"
+region_code                  = "eus2"
+location                     = "eastus2"
+policy_assignment_location   = "eastus"
+deploy_sample_resource_group = true
+resource_group_instance      = "001"
+
+mandatory_tags = [
+  "Environment",
+  "Owner"
+]
+
+default_tags = {
+  Environment = "prod"
+  Owner       = "platform-team"
+  CostCenter  = "IT-001"
+}
+
+policy_assignment_parameters = {
+  naming = {
+    orgPrefix   = "contoso"
+    environment = "prod"
+    regionCode  = "eus2"
+    effect      = "Deny"
+  }
+  tagging = {
+    effect = "Deny"
+  }
+}
